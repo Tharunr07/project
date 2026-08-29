@@ -1,0 +1,68 @@
+rules_version = '2';
+
+// Avengers Holidays — production Cloud Storage rules (PHASE 2E).
+//
+// • Public READ of website imagery in the five content folders.
+// • WRITE / UPDATE / DELETE requires a signed-in account (the only accounts
+//   that exist are the Console-created admin/staff users — there is no
+//   public registration anywhere in the app).
+// • Uploads must be real images (JPEG/JPG/PNG/WEBP) under 5 MB, matching the
+//   client-side validation in src/firebase/storage.js.
+//
+// KNOWN LIMITATION (documented): Storage rules cannot read Firestore, so the
+// admin-vs-staff role split is not enforceable here without custom claims
+// (which require the Admin SDK — deliberately out of scope). The practical
+// exposure is limited to authenticated team accounts. If stronger guarantees
+// are needed later, set custom claims via a one-off Admin SDK script and swap
+// request.auth.token.admin into these rules.
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isUploadedImage() {
+      return request.resource != null
+        && request.resource.contentType.matches('image/(jpeg|jpg|png|webp)')
+        && request.resource.size < 5 * 1024 * 1024;
+    }
+
+    // ── Content folders: public read, team-only writes ──────────────────
+    match /packages/{allPaths=**} {
+      allow read: if true;
+      allow create: if isSignedIn() && isUploadedImage();
+      allow update, delete: if isSignedIn();
+    }
+
+    match /destinations/{allPaths=**} {
+      allow read: if true;
+      allow create: if isSignedIn() && isUploadedImage();
+      allow update, delete: if isSignedIn();
+    }
+
+    match /gallery/{allPaths=**} {
+      allow read: if true;
+      allow create: if isSignedIn() && isUploadedImage();
+      allow update, delete: if isSignedIn();
+    }
+
+    match /reviews/{allPaths=**} {
+      allow read: if true;
+      allow create: if isSignedIn() && isUploadedImage();
+      allow update, delete: if isSignedIn();
+    }
+
+    match /company/{allPaths=**} {
+      allow read: if true;
+      allow create: if isSignedIn() && isUploadedImage();
+      allow update, delete: if isSignedIn();
+    }
+
+    // ── Everything else: locked ─────────────────────────────────────────
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

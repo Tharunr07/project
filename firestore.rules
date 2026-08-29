@@ -1,0 +1,157 @@
+rules_version = '2';
+
+// Avengers Holidays — production Firestore rules (PHASE 2E).
+//
+// Security model:
+//   PUBLIC (unauthenticated):
+//     • READ published-only packages, destinations, gallery, reviews
+//     • READ the company profile document
+//     • CREATE enquiries only (never read/update/delete)
+//   STAFF + ADMIN (active users/{uid} documents):
+//     • Full CRUD on trips, expenses, bills
+//     • Manage gallery and reviews
+//     • Read/write their own enquiries workflow (no delete)
+//   ADMIN ONLY:
+//     • Write/delete catalogue content (packages, destinations, company)
+//     • Delete enquiries
+//     • Read all user records
+//
+// Role is NEVER inferred from "request.auth != null" — it always comes from
+// the caller's users/{uid} document (role: "admin" | "staff", active != false).
+// That collection has NO client writes at all: accounts are managed in the
+// Firebase Console, so privilege escalation from the frontend is impossible.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /* ── Helpers ─────────────────────────────────────────────────────── */
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function userData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function userExists() {
+      return isSignedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
+    function isActiveUser() {
+      return userExists() && userData().active != false;
+    }
+
+    function isAdmin() {
+      return isActiveUser() && userData().role == 'admin';
+    }
+
+    function isStaff() {
+      return isActiveUser() && userData().role == 'staff';
+    }
+
+    /** Any active team member (admin OR staff). */
+    function isTeamMember() {
+      return isAdmin() || isStaff();
+    }
+
+    /* ── Public catalogue ────────────────────────────────────────────── */
+    //
+    // NOTE ON LIST-QUERY SAFETY: each protected collection uses TWO separate
+    // allow statements instead of one combined
+    //   `resource.data.published == true || isTeamMember()`
+    // expression. Multiple allow statements are OR'd, and the team-member
+    // statement depends on NOTHING from resource.data — so Firestore can
+    // always prove team queries safe regardless of query shape, while the
+    // second statement forces anonymous callers to constrain their queries
+    // to published documents. Never merge these back into a single line.
+
+    match /packages/{packageId} {
+      allow get, list: if isTeamMember();
+      allow get, list: if resource.data.published == true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /destinations/{destinationId} {
+      allow get, list: if isTeamMember();
+      allow get, list: if resource.data.published == true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /company/{docId} {
+      allow get, list: if true; // public contact information
+      allow create, update, delete: if isAdmin();
+    }
+
+    /* ── Media & social proof (staff-manageable) ─────────────────────── */
+
+    match /gallery/{itemId} {
+      allow get, list: if isTeamMember();
+      allow get, list: if resource.data.published == true;
+      allow create, update, delete: if isTeamMember();
+    }
+
+    match /reviews/{reviewId} {
+      allow get, list: if isTeamMember();
+      allow get, list: if resource.data.published == true;
+      allow create, update, delete: if isTeamMember();
+    }
+
+    /* ── Enquiries ───────────────────────────────────────────────────── */
+    // Visitors may SUBMIT an enquiry and nothing else. The customer fields
+    // are validated for type and size so the open form cannot be abused as a
+    // free-form database write.
+
+    match /enquiries/{enquiryId} {
+      allow create: if request.resource.data.size() < 10240
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0 && request.resource.data.name.size() <= 120
+        && request.resource.data.phone is string
+        && request.resource.data.phone.size() > 0 && request.resource.data.phone.size() <= 25
+        && request.resource.data.email is string
+        && request.resource.data.email.size() <= 160
+        && request.resource.data.destination is string
+        && request.resource.data.destination.size() <= 120
+        && request.resource.data.packageName is string
+        && request.resource.data.packageName.size() <= 160
+        && request.resource.data.travelDate is string
+        && request.resource.data.travellers is number
+        && request.resource.data.travellers >= 1 && request.resource.data.travellers <= 500
+        && request.resource.data.days is number
+        && request.resource.data.days >= 1 && request.resource.data.days <= 30
+        && request.resource.data.groupType is string
+        && request.resource.data.groupType.size() <= 40
+        && (!('requirements' in request.resource.data) || request.resource.data.requirements is string);
+
+      allow get, list, update: if isTeamMember();
+      allow delete: if isAdmin();
+    }
+
+    /* ── Operations ledger ───────────────────────────────────────────── */
+    // Never publicly readable. Historical prices live on these documents —
+    // they must stay behind authentication.
+
+    match /trips/{tripId} {
+      allow read, write: if isTeamMember();
+    }
+
+    match /expenses/{expenseId} {
+      allow read, write: if isTeamMember();
+    }
+
+    match /bills/{billId} {
+      allow read, write: if isTeamMember();
+    }
+
+    /* ── Users & roles ───────────────────────────────────────────────── */
+    // Readable: your own record (the login flow needs it) or by an admin.
+    // Writable: NEVER from the client — roles are Console-managed, which
+    // removes every privilege-escalation path from the frontend.
+
+    match /users/{userId} {
+      allow get: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+      allow list: if isAdmin();
+      allow create, update, delete: if false;
+    }
+  }
+}

@@ -1,0 +1,1018 @@
+@import 'tailwindcss';
+
+/* ==========================================================================
+   Avengers Holidays — design tokens
+   Identity: white paper, one signal red, warm near-black ink.
+
+   Four ramps do all the work:
+     paper   page and band surfaces (white → warm off-white)
+     ink     type, rules and dark surfaces (warm near-black)
+     brand   the red — actions, accents, the stats band
+     bone    warm-white accents for use ON red or ink surfaces
+     gold    reserved for admin status chips only (amber, never brand)
+
+   The legacy `navy-*` / `sand-*` / `crimson-*` names are kept as aliases so
+   the ~950 existing class names keep working and retheme automatically:
+     navy → ink,  sand → paper,  crimson → brand
+   New code should prefer ink / paper / brand / bone.
+   ========================================================================== */
+@theme {
+  --font-sans: 'Inter Tight', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Fraunces', 'Iowan Old Style', Georgia, serif;
+  /* Condensed signage face — eyebrows, labels, tabular data */
+  --font-utility: 'Archivo Narrow', 'Inter Tight', ui-sans-serif, sans-serif;
+
+  /* ---------------------------------------------------------------- paper */
+  --color-paper-50: #fdfcfb;
+  --color-paper-100: #f6f3f1;
+  --color-paper-200: #ebe5e2;
+  --color-paper-300: #d8d0cc;
+
+  /* ------------------------------------------------------------------ ink */
+  --color-ink-50: #f8f6f5;
+  --color-ink-100: #eeeae8;
+  --color-ink-200: #dbd5d2;
+  --color-ink-300: #b9b0ac;
+  --color-ink-400: #7c736f;
+  --color-ink-500: #5a5350;
+  --color-ink-600: #45403d;
+  --color-ink-700: #332f2c;
+  --color-ink-800: #24211f;
+  --color-ink-900: #171413;
+  --color-ink-950: #0c0a09;
+
+  /* ---------------------------------------------------------------- brand */
+  --color-brand-50: #fff4f5;
+  --color-brand-100: #ffe4e7;
+  --color-brand-200: #ffc8cd;
+  --color-brand-300: #f99ea7;
+  --color-brand-400: #f06a78;
+  --color-brand-500: #de2438;
+  --color-brand-600: #c10e27;
+  --color-brand-700: #9c0a1f;
+  --color-brand-800: #78091a;
+  --color-brand-900: #5a0916;
+  --color-brand-950: #35040c;
+
+  /* ----------------------------------------------------------------- bone */
+  --color-bone-50: #fffbfa;
+  --color-bone-100: #fff2f1;
+  --color-bone-200: #fbe0e1;
+  --color-bone-300: #f5cbce;
+  --color-bone-400: #ebaeb2;
+  --color-bone-500: #db9095;
+
+  /* ----------------------------------- gold — admin status chips (amber) */
+  --color-gold-50: #fef9ec;
+  --color-gold-100: #fbefcd;
+  --color-gold-200: #f6dfa2;
+  --color-gold-300: #efc96e;
+  --color-gold-400: #e3ae3c;
+  --color-gold-500: #cb9021;
+  --color-gold-600: #a5701a;
+  --color-gold-700: #7d5416;
+
+  /* -------------------------------------------------- legacy name aliases */
+  --color-navy-50: var(--color-ink-50);
+  --color-navy-100: var(--color-ink-100);
+  --color-navy-200: var(--color-ink-200);
+  --color-navy-300: var(--color-ink-300);
+  --color-navy-400: var(--color-ink-400);
+  --color-navy-500: var(--color-ink-500);
+  --color-navy-600: var(--color-ink-600);
+  --color-navy-700: var(--color-ink-700);
+  --color-navy-800: var(--color-ink-800);
+  --color-navy-900: var(--color-ink-900);
+  --color-navy-950: var(--color-ink-950);
+
+  --color-sand-50: var(--color-paper-50);
+  --color-sand-100: var(--color-paper-100);
+  --color-sand-200: var(--color-paper-200);
+  --color-sand-300: var(--color-paper-300);
+
+  --color-crimson-50: var(--color-brand-50);
+  --color-crimson-100: var(--color-brand-100);
+  --color-crimson-200: var(--color-brand-200);
+  --color-crimson-300: var(--color-brand-300);
+  --color-crimson-400: var(--color-brand-400);
+  --color-crimson-500: var(--color-brand-500);
+  --color-crimson-600: var(--color-brand-600);
+  --color-crimson-700: var(--color-brand-700);
+  --color-crimson-800: var(--color-brand-800);
+  --color-crimson-900: var(--color-brand-900);
+
+  /* Shadows are warm-neutral, tuned for a white page rather than a navy one */
+  --shadow-card: 0 1px 2px rgb(23 20 19 / 0.04), 0 8px 22px -14px rgb(23 20 19 / 0.14);
+  --shadow-lift: 0 2px 4px rgb(23 20 19 / 0.05), 0 22px 46px -22px rgb(23 20 19 / 0.26);
+  --shadow-glow: 0 10px 30px -12px rgb(193 14 39 / 0.42);
+  --shadow-panel: 0 1px 3px rgb(23 20 19 / 0.05), 0 12px 30px -20px rgb(23 20 19 / 0.22);
+
+  /* Tightened corner language — reads as an operator, not a consumer app */
+  --radius-2xl: 0.875rem;
+  --radius-3xl: 1.125rem;
+  --radius-4xl: 1.5rem;
+
+  --animate-fade-up: fade-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-fade-in: fade-in 0.5s ease-out both;
+  --animate-scale-in: scale-in 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-slide-down: slide-down 0.24s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-ken-burns: ken-burns 22s ease-out both;
+  --animate-shimmer: shimmer 1.6s linear infinite;
+  --animate-float: float 6s ease-in-out infinite;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes ken-burns {
+  from {
+    transform: scale(1.02);
+  }
+  to {
+    transform: scale(1.14);
+  }
+}
+
+@keyframes shimmer {
+  from {
+    background-position: -180% 0;
+  }
+  to {
+    background-position: 180% 0;
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+/* ==========================================================================
+   Base
+   ========================================================================== */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    background-color: var(--color-paper-50);
+    color: var(--color-ink-900);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Fraunces is a variable serif: optical sizing does the work at display
+     sizes, so headings need less negative tracking than a grotesque would. */
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    font-optical-sizing: auto;
+    letter-spacing: -0.011em;
+    font-weight: 700;
+  }
+
+  ::selection {
+    background-color: var(--color-brand-600);
+    color: white;
+  }
+
+  /* Keyboard focus only — avoids permanent rings after mouse clicks */
+  :focus-visible {
+    outline: 2px solid var(--color-brand-600);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/* ==========================================================================
+   Utilities
+   ========================================================================== */
+@utility shell {
+  /* Standard page gutter + max width, used by every section */
+  margin-inline: auto;
+  width: 100%;
+  max-width: 80rem;
+  padding-inline: 1.25rem;
+
+  @media (width >= 40rem) {
+    padding-inline: 2rem;
+  }
+
+  @media (width >= 64rem) {
+    padding-inline: 2.5rem;
+  }
+}
+
+/*
+ * Signature motif — the red-and-white vertical banding painted on temple
+ * compound walls across Tamil Nadu. Used as the seam between major sections,
+ * which is also where the brand's two colours belong. Sparingly: three per page.
+ */
+@utility band {
+  height: 0.625rem;
+  background-image: repeating-linear-gradient(
+    90deg,
+    var(--color-brand-600) 0,
+    var(--color-brand-600) 0.875rem,
+    var(--color-paper-50) 0.875rem,
+    var(--color-paper-50) 1.75rem
+  );
+}
+
+@utility no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@utility skeleton {
+  background-image: linear-gradient(
+    90deg,
+    var(--color-paper-200) 8%,
+    var(--color-paper-100) 22%,
+    var(--color-paper-200) 36%
+  );
+  background-size: 220% 100%;
+  animation: var(--animate-shimmer);
+}
+
+/* Reveal-on-scroll: initial state, cleared by the useReveal hook */
+@utility reveal {
+  opacity: 0;
+  transform: translateY(22px);
+  transition:
+    opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@utility reveal-in {
+  opacity: 1;
+  transform: none;
+}
+
+/* ==========================================================================
+   Landing Hero — full-viewport cinematic hero
+   ========================================================================== */
+@keyframes hero-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes hero-cta-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---- CONTAINER ---- */
+.landing-hero {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow: hidden;
+  background: var(--color-ink-950);
+  /* Counteract the parent main's pt-[4.5rem] so the hero fills the full viewport */
+  margin-top: -4.5rem;
+}
+
+/* ---- VIDEO ---- */
+.landing-hero__video-wrap {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.landing-hero__video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 70% center;
+}
+
+/* ---- LEFT CONTENT ---- */
+.landing-hero__content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: 6rem 2.5rem 4rem;
+  max-width: 55%;
+}
+
+@media (min-width: 40rem) {
+  .landing-hero__content {
+    padding: 6rem 3rem 4rem 5rem;
+  }
+}
+
+@media (min-width: 64rem) {
+  .landing-hero__content {
+    padding: 6rem 4rem 4rem 6rem;
+  }
+}
+
+/* ---- EYEBROW ---- */
+.landing-hero__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  align-self: flex-start;
+  padding: 0.5rem 1rem 0.5rem 0.75rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.1);
+  font-family: var(--font-utility);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-bone-200);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+  margin-bottom: 1.5rem;
+  opacity: 0;
+}
+
+.landing-hero__eyebrow-dot {
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: 9999px;
+  background: var(--color-brand-500);
+}
+
+/* ---- HEADING ---- */
+.landing-hero__heading {
+  font-family: var(--font-display);
+  font-optical-sizing: auto;
+  font-weight: 700;
+  letter-spacing: -0.011em;
+  color: white;
+  line-height: 1.05;
+}
+
+.landing-hero__line {
+  display: block;
+  opacity: 0;
+  font-size: 3.5rem;
+}
+
+.landing-hero__line--accent {
+  color: var(--color-gold-400);
+  font-size: 4rem;
+}
+
+@media (min-width: 40rem) {
+  .landing-hero__line {
+    font-size: 4.5rem;
+  }
+  .landing-hero__line--accent {
+    font-size: 5rem;
+  }
+}
+
+@media (min-width: 64rem) {
+  .landing-hero__line {
+    font-size: 5.5rem;
+  }
+  .landing-hero__line--accent {
+    font-size: 6rem;
+  }
+}
+
+/* ---- SUB-HEADING ---- */
+.landing-hero__sub {
+  font-family: var(--font-sans);
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--color-ink-200);
+  margin-top: 1rem;
+  line-height: 1.4;
+  opacity: 0;
+}
+
+@media (min-width: 40rem) {
+  .landing-hero__sub {
+    font-size: 1.375rem;
+  }
+}
+
+@media (min-width: 64rem) {
+  .landing-hero__sub {
+    font-size: 1.5rem;
+    margin-top: 1.25rem;
+  }
+}
+
+/* ---- LEAD ---- */
+.landing-hero__lead {
+  margin-top: 1.5rem;
+  max-width: 600px;
+  font-size: 1.0625rem;
+  line-height: 1.75;
+  color: var(--color-ink-100);
+  opacity: 0;
+}
+
+@media (min-width: 40rem) {
+  .landing-hero__lead {
+    font-size: 1.125rem;
+  }
+}
+
+/* ---- CTA ---- */
+.landing-hero__actions {
+  margin-top: 2.25rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  opacity: 0;
+}
+
+/* ---- REVEAL ---- */
+.landing-hero__reveal {
+  animation: hero-reveal 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.landing-hero__actions.landing-hero__reveal {
+  animation-name: hero-cta-reveal;
+  animation-duration: 0.5s;
+}
+
+/* ---- TABLET ---- */
+@media (min-width: 40rem) and (max-width: 63.9375rem) {
+  .landing-hero__content {
+    max-width: 65%;
+    padding: 5rem 2.5rem 3rem;
+  }
+}
+
+/* ---- MOBILE ---- */
+@media (max-width: 47.9375rem) {
+  .landing-hero__content {
+    max-width: 100%;
+    min-height: auto;
+    padding: 5rem 1.25rem 3rem;
+  }
+
+  .landing-hero__video {
+    object-position: 65% center;
+  }
+
+  .landing-hero__line {
+    font-size: 2.75rem;
+  }
+
+  .landing-hero__line--accent {
+    font-size: 3.25rem;
+  }
+
+  .landing-hero__sub {
+    font-size: 1rem;
+  }
+}
+
+/* ==========================================================================
+   Dynamic Island Navigation
+   ========================================================================== */
+html {
+  scroll-padding-top: 5.5rem;
+}
+
+.navbar-island {
+  position: fixed;
+  z-index: 10000;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-12px) scale(0.96);
+  width: calc(100% - 2.5rem);
+  max-width: 72rem;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    background 0.35s ease,
+    box-shadow 0.35s ease;
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 9999px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.navbar-island--visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0) scale(1);
+}
+
+.navbar-island--scrolled {
+  background: rgba(12, 10, 9, 0.45);
+  border-color: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+}
+
+.navbar-island__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 3rem;
+  padding: 0 1.25rem;
+}
+
+@media (min-width: 64rem) {
+  .navbar-island__inner {
+    height: 3.25rem;
+    padding: 0 1.75rem;
+  }
+}
+
+.navbar-island__cta {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  border-radius: 9999px;
+  background: var(--color-brand-600);
+  padding: 0.5rem 1.25rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: white;
+  text-decoration: none;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+
+.navbar-island__cta:hover {
+  background: var(--color-brand-700);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+}
+
+.navbar-island__cta--mobile {
+  padding: 0.375rem 0.875rem;
+  font-size: 0.75rem;
+}
+
+.navbar-island__burger {
+  display: grid;
+  place-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  cursor: pointer;
+  border-radius: 9999px;
+  color: rgba(255, 255, 255, 0.7);
+  transition: color 0.2s, background 0.2s;
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+}
+
+.navbar-island__burger:hover {
+  color: white;
+}
+
+/* Mobile drawer — liquid glass */
+.navbar-island__drawer {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(12, 10, 9, 0.92);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-radius: 0 0 9999px 9999px;
+}
+
+@media (max-width: 63.9375rem) {
+  .navbar-island {
+    top: 12px;
+    width: calc(100% - 1.5rem);
+  }
+}
+
+/* ==========================================================================
+   Editorial Testimonials
+   ========================================================================== */
+@keyframes testi-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.testi-editorial {
+  max-width: 78rem;
+  margin: 0 auto;
+}
+
+/* ---- Header ---- */
+.testi-editorial__header {
+  margin-bottom: 3.5rem;
+}
+
+.testi-editorial__eyebrow {
+  font-family: var(--font-utility);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-gold-400);
+  margin-bottom: 0.75rem;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.testi-editorial--in .testi-editorial__eyebrow {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.testi-editorial__heading {
+  font-family: var(--font-display);
+  font-optical-sizing: auto;
+  font-weight: 700;
+  font-size: 2.25rem;
+  line-height: 1.1;
+  color: var(--color-bone-100);
+  letter-spacing: -0.01em;
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.6s ease 0.1s, transform 0.6s ease 0.1s;
+}
+
+.testi-editorial--in .testi-editorial__heading {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.testi-editorial__lead {
+  margin-top: 1rem;
+  max-width: 520px;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--color-bone-300);
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.6s ease 0.2s, transform 0.6s ease 0.2s;
+}
+
+.testi-editorial--in .testi-editorial__lead {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ---- Body (two-column) ---- */
+.testi-editorial__body {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2.5rem;
+}
+
+@media (min-width: 64rem) {
+  .testi-editorial__body {
+    grid-template-columns: 55fr 45fr;
+    gap: 3.5rem;
+    align-items: start;
+  }
+}
+
+/* ---- Content (left) ---- */
+.testi-editorial__content {
+  position: relative;
+}
+
+.testi-editorial__quote-mark {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 6rem;
+  line-height: 0.8;
+  color: var(--color-gold-400);
+  opacity: 0.18;
+  margin-bottom: -1rem;
+  user-select: none;
+}
+
+@media (min-width: 64rem) {
+  .testi-editorial__quote-mark {
+    font-size: 8rem;
+  }
+}
+
+.testi-editorial__text {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  line-height: 1.7;
+  color: var(--color-bone-100);
+  font-style: italic;
+  opacity: 0;
+  transform: translateY(12px);
+  filter: blur(4px);
+  transition: opacity 0.6s ease, transform 0.6s ease, filter 0.6s ease;
+}
+
+.testi-editorial__text--in {
+  opacity: 1;
+  transform: translateY(0);
+  filter: blur(0);
+}
+
+@media (min-width: 40rem) {
+  .testi-editorial__text {
+    font-size: 1.375rem;
+  }
+}
+
+@media (min-width: 64rem) {
+  .testi-editorial__text {
+    font-size: 1.5rem;
+    line-height: 1.65;
+  }
+}
+
+/* Traveller info */
+.testi-editorial__traveller {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.5s ease 0.25s, transform 0.5s ease 0.25s;
+}
+
+.testi-editorial__traveller--in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.testi-editorial__avatar {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 9999px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.testi-editorial__name {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--color-bone-100);
+}
+
+.testi-editorial__meta {
+  margin-top: 0.125rem;
+  font-size: 0.8125rem;
+  color: var(--color-bone-300);
+}
+
+/* ---- Image (right) ---- */
+.testi-editorial__image-wrap {
+  position: relative;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+@media (min-width: 64rem) {
+  .testi-editorial__image-wrap {
+    aspect-ratio: 3 / 4;
+    border-radius: 1rem;
+  }
+}
+
+.testi-editorial__image-inner {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+.testi-editorial__image-inner--in {
+  opacity: 1;
+}
+
+.testi-editorial__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.5s ease, transform 6s ease;
+}
+
+.testi-editorial__img--ready {
+  opacity: 1;
+}
+
+.testi-editorial__image-wrap:hover .testi-editorial__img--ready {
+  transform: scale(1.04);
+}
+
+.testi-editorial__img--placeholder {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* ---- Navigation ---- */
+.testi-editorial__nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  margin-top: 2.5rem;
+}
+
+@media (min-width: 64rem) {
+  .testi-editorial__nav {
+    justify-content: flex-start;
+    margin-top: 3rem;
+  }
+}
+
+.testi-editorial__nav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-utility);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-bone-300);
+  cursor: pointer;
+  transition: color 0.2s;
+  background: none;
+  border: none;
+  padding: 0.5rem 0;
+}
+
+.testi-editorial__nav-btn:hover {
+  color: var(--color-gold-400);
+}
+
+.testi-editorial__counter {
+  display: flex;
+  align-items: baseline;
+  gap: 0.25rem;
+  font-family: var(--font-utility);
+  font-variant-numeric: tabular-nums;
+}
+
+.testi-editorial__counter-current {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--color-bone-100);
+}
+
+.testi-editorial__counter-sep {
+  font-size: 0.8125rem;
+  color: var(--color-bone-300);
+  opacity: 0.5;
+}
+
+.testi-editorial__counter-total {
+  font-size: 0.8125rem;
+  color: var(--color-bone-300);
+}
+
+/* ---- Gold progress line ---- */
+.testi-editorial__progress {
+  margin-top: 2rem;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+@media (min-width: 64rem) {
+  .testi-editorial__progress {
+    max-width: 28rem;
+  }
+}
+
+.testi-editorial__progress-fill {
+  height: 100%;
+  background: var(--color-gold-400);
+  border-radius: 9999px;
+  transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ==========================================================================
+   Print — used by the admin bill preview
+   ========================================================================== */
+@media print {
+  body {
+    background: white;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .print-sheet {
+    box-shadow: none !important;
+    border: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    max-width: none !important;
+  }
+
+  /*
+   * Bill printing: when the bill preview overlay is open, hide the whole app
+   * and flatten the portal overlay so window.print() outputs only the sheet.
+   */
+  body.bill-open #root {
+    display: none !important;
+  }
+
+  body.bill-open .admin-bill-overlay {
+    position: static !important;
+    background: none !important;
+    backdrop-filter: none !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+
+  @page {
+    margin: 14mm;
+  }
+}
