@@ -1,6 +1,7 @@
 import { Outlet } from 'react-router-dom'
 import FloatingActions from './FloatingActions'
 import Footer from './Footer'
+import MarqueeStrip from './MarqueeStrip'
 import Navbar from './Navbar'
 import ScrollToTop from './ScrollToTop'
 
@@ -28,6 +29,7 @@ export default function CustomerLayout() {
         <Outlet />
       </main>
 
+      <MarqueeStrip />
       <Footer />
       <FloatingActions />
     </div>

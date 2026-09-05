@@ -21,9 +21,9 @@ import DestinationCard from '../components/cards/DestinationCard'
 import PackageCard from '../components/cards/PackageCard'
 import StatsCard from '../components/cards/StatsCard'
 import CTASection from '../components/sections/CTASection'
+import CompanyIntroSection from '../components/sections/CompanyIntroSection'
 import GalleryPreview from '../components/sections/GalleryPreview'
-import LandingIntro from '../components/sections/LandingIntro'
-import StoryTimeline from '../components/sections/StoryTimeline'
+import CinematicHero from '../components/sections/CinematicHero'
 import TestimonialCarousel from '../components/sections/TestimonialCarousel'
 import BusRouteJourney from '../components/sections/BusRouteJourney'
 import TravellerBusInterior from '../components/sections/TravellerBusInterior'
@@ -217,7 +217,7 @@ export default function Home() {
 
   return (
     <>
-      <LandingIntro />
+      <CinematicHero />
 
       {/* ------------------------------------------------------- trust strip */}
       <TrustStrip averageRating={averageRating} reviewCount={reviewCount} />
@@ -346,9 +346,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ------------------------------------------------------------- story */}
-      <StoryTimeline />
-
       {/* ----------------------------------------------------------- process */}
       <section className="shell py-16 sm:py-20 lg:py-24">
         <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
@@ -434,6 +431,9 @@ export default function Home() {
 
       {/* ---------------------------------------------------- gallery preview */}
       <GalleryPreview />
+
+      {/* -------------------------------------------------- company intro */}
+      <CompanyIntroSection />
 
       <CTASection />
     </>

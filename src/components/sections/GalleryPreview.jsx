@@ -4,13 +4,11 @@ import { usePublishedGallery } from '../../firebase/collections/gallery'
 import Button from '../ui/Button'
 import SectionTitle from '../ui/SectionTitle'
 import { CardSkeletonGrid } from '../ui/States'
-import GalleryGrid from './GalleryGrid'
+import GalleryReel from './GalleryReel'
 
 /**
- * Homepage photo strip. Reuses GalleryGrid so the lightbox behaves exactly as
- * it does on /gallery, and simply caps the list. If the collection is empty or
- * unreachable the whole band renders nothing — a homepage should never show an
- * error panel where photographs were promised.
+ * Homepage photo strip with a continuously moving horizontal reel.
+ * Clicking any image opens a full-screen lightbox.
  */
 
 const PREVIEW_COUNT = 6
@@ -21,7 +19,6 @@ export default function GalleryPreview({ count = PREVIEW_COUNT, className = '' }
   const preview = useMemo(() => (data ?? []).slice(0, count), [data, count])
   const total = (data ?? []).length
 
-  // Nothing to show and nothing loading — skip the section entirely.
   if (!loading && (error || preview.length === 0)) return null
 
   return (
@@ -43,7 +40,7 @@ export default function GalleryPreview({ count = PREVIEW_COUNT, className = '' }
             <CardSkeletonGrid count={count} className="grid-cols-2 lg:grid-cols-3" />
           ) : (
             <>
-              <GalleryGrid items={preview} columns="grid-cols-2 lg:grid-cols-3" />
+              <GalleryReel items={preview} />
 
               {total > preview.length && (
                 <p className="mt-8 flex items-center justify-center gap-2 text-sm font-semibold text-navy-500">

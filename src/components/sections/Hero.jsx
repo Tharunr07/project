@@ -114,7 +114,7 @@ export default function Hero({
 
   return (
     <section
-      className={`relative isolate flex flex-col justify-end overflow-hidden bg-navy-950 ${
+      className={`relative -mt-[4.5rem] isolate flex flex-col justify-end overflow-hidden bg-navy-950 ${
         SIZES[size] ?? SIZES.page
       } ${className}`}
     >
