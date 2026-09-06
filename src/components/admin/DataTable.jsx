@@ -15,8 +15,8 @@ const ALIGN = {
 }
 
 export function DataTable({
-  columns,
-  rows,
+  columns = [],
+  rows = [],
   keyField = 'id',
   loading = false,
   error = null,
@@ -28,7 +28,10 @@ export function DataTable({
   footer,
   minWidth = 880,
 }) {
-  if (loading) return <TableSkeleton rows={7} columns={Math.min(columns.length, 6)} />
+  const safeColumns = Array.isArray(columns) ? columns : []
+  const safeRows = Array.isArray(rows) ? rows : []
+
+  if (loading) return <TableSkeleton rows={7} columns={Math.min(safeColumns.length, 6)} />
 
   if (error) {
     return (
@@ -36,7 +39,7 @@ export function DataTable({
     )
   }
 
-  if (!rows.length) {
+  if (!safeRows.length) {
     return <EmptyState icon={emptyIcon} title={emptyTitle} message={emptyMessage} action={emptyAction} />
   }
 
@@ -46,7 +49,7 @@ export function DataTable({
         <table className="w-full border-collapse" style={{ minWidth }}>
           <thead>
             <tr className="border-b border-sand-200 bg-sand-50">
-              {columns.map((column) => (
+              {safeColumns.map((column) => (
                 <th
                   key={column.key}
                   scope="col"
@@ -62,12 +65,12 @@ export function DataTable({
           </thead>
 
           <tbody className="divide-y divide-sand-100">
-            {rows.map((row, rowIndex) => (
+            {safeRows.map((row, rowIndex) => (
               <tr
                 key={row[keyField] ?? `row-${rowIndex}`}
                 className="transition-colors hover:bg-sand-50/70"
               >
-                {columns.map((column, columnIndex) => (
+                {safeColumns.map((column, columnIndex) => (
                   <td
                     key={column.key}
                     className={`px-5 py-4 align-middle text-sm ${

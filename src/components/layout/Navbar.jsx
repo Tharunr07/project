@@ -15,6 +15,7 @@ import Logo from '../ui/Logo'
  */
 
 export const NAV_LINKS = [
+  { label: 'Home', to: '/' },
   { label: 'Destinations', to: '/destinations' },
   { label: 'Packages', to: '/packages' },
   { label: 'About', to: '/about' },

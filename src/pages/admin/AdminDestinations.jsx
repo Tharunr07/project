@@ -16,6 +16,7 @@ import { PACKAGE_CATEGORIES } from '../../data/constants'
 import {
   deleteDestination as deleteDestinationDoc,
   saveDestination as saveDestinationDoc,
+  seedDestinationContent,
   updateDestinationFields,
   useDestinations,
 } from '../../firebase/collections/destinations'
@@ -38,6 +39,7 @@ export default function AdminDestinations() {
   const [errors, setErrors] = useState({})
   const [pickerField, setPickerField] = useState(null)
   const [saving, setSaving] = useState(false)
+  const [backfilling, setBackfilling] = useState(false)
 
   function emptyForm() {
     return {
@@ -157,6 +159,28 @@ export default function AdminDestinations() {
     }
   }
 
+  const handleBackfill = async () => {
+    setBackfilling(true)
+    try {
+      const summary = await seedDestinationContent()
+      if (summary && summary.attractionsAdded > 0) {
+        toast(
+          `Destination attractions updated successfully — ${summary.updated} destination${
+            summary.updated === 1 ? '' : 's'
+          } updated, ${summary.preserved} preserved, ${summary.attractionsAdded} attraction${
+            summary.attractionsAdded === 1 ? '' : 's'
+          } added.`,
+        )
+      } else {
+        toast('All destination attractions are already up to date', 'info')
+      }
+    } catch (err) {
+      toast(err.message ?? 'Could not backfill destination content', 'error')
+    } finally {
+      setBackfilling(false)
+    }
+  }
+
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -164,9 +188,14 @@ export default function AdminDestinations() {
           <span className="font-extrabold text-navy-900">{visible.length}</span> of {rows.length}{' '}
           destinations
         </p>
-        <Button variant="primary" size="sm" icon={Plus} onClick={openAdd}>
-          Add Destination
-        </Button>
+        <span className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={handleBackfill} loading={backfilling} disabled={backfilling}>
+            {backfilling ? 'Backfilling…' : 'Backfill attractions'}
+          </Button>
+          <Button variant="primary" size="sm" icon={Plus} onClick={openAdd}>
+            Add Destination
+          </Button>
+        </span>
       </div>
 
       <div className="rounded-3xl bg-white p-4 shadow-card sm:p-5">

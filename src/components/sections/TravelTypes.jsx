@@ -9,8 +9,6 @@ import {
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { GROUP_TYPES } from '../../data/constants'
-import Button from '../ui/Button'
-import SectionTitle from '../ui/SectionTitle'
 import { useReveal } from '../../hooks'
 
 /**
@@ -95,20 +93,9 @@ function TypeCard({ type, index }) {
 
 export default function TravelTypes({ className = '' }) {
   return (
-    <section className={`bg-white py-16 sm:py-20 lg:py-24 ${className}`}>
+    <section className={`bg-white py-10 sm:py-14 lg:py-16 ${className}`}>
       <div className="shell">
-        <div className="flex flex-wrap items-end justify-between gap-6">
-          <SectionTitle
-            eyebrow="Who we travel with"
-            title="Six kinds of groups, one standard of care"
-            lead="Pick the one that sounds like yours — the pacing, the food, the rooming and the paperwork all change with it."
-          />
-          <Button to="/enquire" variant="outline" size="md">
-            Start an Enquiry
-          </Button>
-        </div>
-
-        <ul className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
+        <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
           {GROUP_TYPES.map((type, index) => (
             <TypeCard key={type} type={type} index={index} />
           ))}

@@ -3,19 +3,21 @@
  * package sort options and admin status filters.
  */
 export default function FilterPills({
-  options,
+  options = [],
   value,
   onChange,
   label = 'Filter',
   className = '',
 }) {
+  const safeOptions = Array.isArray(options) ? options : []
+
   return (
     <div
       role="group"
       aria-label={label}
       className={`no-scrollbar -mx-1 flex gap-2 overflow-x-auto px-1 py-1 ${className}`}
     >
-      {options.map((option) => {
+      {safeOptions.map((option) => {
         const optValue = typeof option === 'string' ? option : option.value
         const optLabel = typeof option === 'string' ? option : option.label
         const count = typeof option === 'string' ? undefined : option.count

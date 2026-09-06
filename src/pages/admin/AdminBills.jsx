@@ -30,7 +30,7 @@ import { formatCurrency, formatDate } from '../../utils/format'
 export default function AdminBills() {
   const toast = useToast()
   const { rows, loading, error, reload } = useBills()
-  const { data: trips } = useTrips()
+  const { rows: trips } = useTrips()
 
   const [query, setQuery] = useState('')
   const [status, setStatus] = useState('All')
@@ -292,13 +292,14 @@ export default function AdminBills() {
  * never re-read from the packages collection — which keeps old invoices
  * correct forever. Trips come from the live Firestore ledger.
  */
-function BillGeneratorModal({ open, onClose, onIssue, nextBillId, trips = [], busy = false }) {
+function BillGeneratorModal({ open, onClose, onIssue, nextBillId, trips, busy = false }) {
+  const safeTrips = Array.isArray(trips) ? trips : []
   const completedTrips = useMemo(
     () =>
-      [...trips]
+      safeTrips
         .filter((trip) => trip.status === 'Completed')
         .sort((a, b) => String(b.date).localeCompare(String(a.date))),
-    [trips],
+    [safeTrips],
   )
 
   const blankDraft = () => ({
@@ -322,7 +323,7 @@ function BillGeneratorModal({ open, onClose, onIssue, nextBillId, trips = [], bu
   // Re-prefill commercial fields whenever the selected trip changes.
   useEffect(() => {
     if (!tripId) return
-    const trip = (trips ?? []).find((item) => item.id === tripId)
+    const trip = safeTrips.find((item) => item.id === tripId)
     if (!trip) return
     setValues((current) => ({
       ...current,
@@ -333,13 +334,13 @@ function BillGeneratorModal({ open, onClose, onIssue, nextBillId, trips = [], bu
         pricePerPerson: trip.pricePerPerson,
       },
     }))
-  }, [tripId, trips])
+  }, [tripId, safeTrips])
 
   const set = (field) => (event) => {
     setValues((current) => ({ ...current, [field]: event.target.value }))
   }
 
-  const trip = (trips ?? []).find((item) => item.id === tripId)
+  const trip = safeTrips.find((item) => item.id === tripId)
 
   const handleIssue = async () => {
     if (!trip || !values.snapshot || busy) return

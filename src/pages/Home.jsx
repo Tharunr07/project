@@ -18,16 +18,15 @@ import {
 } from 'lucide-react'
 import { useMemo } from 'react'
 import DestinationCard from '../components/cards/DestinationCard'
-import PackageCard from '../components/cards/PackageCard'
 import StatsCard from '../components/cards/StatsCard'
 import CTASection from '../components/sections/CTASection'
+import FAQSection from '../components/sections/FAQSection'
 import CompanyIntroSection from '../components/sections/CompanyIntroSection'
 import GalleryPreview from '../components/sections/GalleryPreview'
 import CinematicHero from '../components/sections/CinematicHero'
 import TestimonialCarousel from '../components/sections/TestimonialCarousel'
 import BusRouteJourney from '../components/sections/BusRouteJourney'
 import TravellerBusInterior from '../components/sections/TravellerBusInterior'
-import TravelTypes from '../components/sections/TravelTypes'
 import TrustStrip from '../components/sections/TrustStrip'
 import Button from '../components/ui/Button'
 import SectionTitle from '../components/ui/SectionTitle'
@@ -39,7 +38,6 @@ import {
   usePublishedReviews,
 } from '../firebase/collections/reviews'
 import { usePublishedDestinations } from '../firebase/collections/destinations'
-import { usePublishedPackages } from '../firebase/collections/packages'
 import { useReveal } from '../hooks'
 import { formatNumber } from '../utils/format'
 
@@ -189,8 +187,7 @@ function HighlightTile({ item, index }) {
 export default function Home() {
   const processRef = useReveal()
 
-  // Live Firestore data — published packages, destinations and reviews only.
-  const { data: publishedPackages } = usePublishedPackages()
+  // Live Firestore data — published destinations and reviews only.
   const { data: publishedDestinations } = usePublishedDestinations()
   const { data: publishedReviews } = usePublishedReviews()
 
@@ -199,15 +196,6 @@ export default function Home() {
   const featuredReviews = useMemo(
     () => (publishedReviews ?? []).filter((review) => review.featured),
     [publishedReviews],
-  )
-
-  /** Phase 1 logic preserved: popular flag first, then featured, top six. */
-  const popularList = useMemo(
-    () =>
-      [...(publishedPackages ?? [])]
-        .sort((a, b) => Number(b.popular) - Number(a.popular) || Number(b.featured) - Number(a.featured))
-        .slice(0, 6),
-    [publishedPackages],
   )
 
   const featuredList = useMemo(
@@ -288,9 +276,6 @@ export default function Home() {
       {/* -------------------------------------------------- traveller bus interior */}
       <TravellerBusInterior />
 
-      {/* ------------------------------------------------------ travel types */}
-      <TravelTypes />
-
       {/* ------------------------------------------------------------ why us */}
       <section className="bg-sand-100 py-16 sm:py-20 lg:py-24">
         <div className="shell">
@@ -321,28 +306,6 @@ export default function Home() {
           {HIGHLIGHTS.map((item, index) => (
             <HighlightTile key={item.title} item={item} index={index} />
           ))}
-        </div>
-      </section>
-
-      {/* ---------------------------------------------------------- packages */}
-      <section className="bg-sand-100 py-16 sm:py-20 lg:py-24">
-        <div className="shell">
-          <div className="flex flex-wrap items-end justify-between gap-6">
-            <SectionTitle
-              eyebrow="Popular packages"
-              title="Ready-made itineraries, adjusted to your dates"
-              lead="These are our most-booked trips this season. Every one can be shortened, extended or re-costed for your group size."
-            />
-            <Button to="/packages" variant="outline" size="md">
-              All Packages
-            </Button>
-          </div>
-
-          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {popularList.map((pkg, index) => (
-              <PackageCard key={pkg.id} pkg={pkg} delay={index * 70} />
-            ))}
-          </div>
         </div>
       </section>
 
@@ -423,10 +386,8 @@ export default function Home() {
       </section>
 
       {/* ------------------------------------------------------- testimonials */}
-      <section className="bg-ink-950 py-16 sm:py-20 lg:py-24">
-        <div className="shell">
-          <TestimonialCarousel reviews={featuredReviews} />
-        </div>
+      <section>
+        <TestimonialCarousel reviews={featuredReviews} />
       </section>
 
       {/* ---------------------------------------------------- gallery preview */}
@@ -436,6 +397,9 @@ export default function Home() {
       <CompanyIntroSection />
 
       <CTASection />
+
+      {/* ------------------------------------------------------------ faq */}
+      <FAQSection />
     </>
   )
 }

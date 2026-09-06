@@ -1,6 +1,7 @@
 import {
   BarChart3,
   History,
+  HelpCircle,
   Images,
   LayoutDashboard,
   MapPinned,
@@ -45,6 +46,8 @@ export const NAV_SECTIONS = [
     items: [
       { to: '/admin/gallery', label: 'Gallery', icon: Images },
       { to: '/admin/reviews', label: 'Reviews', icon: Star },
+      { to: '/admin/faqs', label: 'FAQs', icon: HelpCircle },
+      { to: '/admin/route-destinations', label: 'Route Stops', icon: Route },
     ],
   },
   {

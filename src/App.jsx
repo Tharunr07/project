@@ -1,4 +1,5 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import ErrorBoundary from './components/admin/ErrorBoundary'
 import RequireAuth from './components/admin/RequireAuth'
 import AdminLayout from './components/admin/AdminLayout'
 import { AdminAuthProvider } from './context/AdminAuthContext'
@@ -19,11 +20,13 @@ import AdminDashboard from './pages/admin/AdminDashboard'
 import AdminDestinations from './pages/admin/AdminDestinations'
 import AdminEnquiries from './pages/admin/AdminEnquiries'
 import AdminExpenses from './pages/admin/AdminExpenses'
+import AdminFAQs from './pages/admin/AdminFAQs'
 import AdminGallery from './pages/admin/AdminGallery'
 import AdminLogin from './pages/admin/AdminLogin'
 import AdminPackages from './pages/admin/AdminPackages'
 import AdminReports from './pages/admin/AdminReports'
 import AdminReviews from './pages/admin/AdminReviews'
+import AdminRouteDestinations from './pages/admin/AdminRouteDestinations'
 import AdminTripHistory from './pages/admin/AdminTripHistory'
 import AdminTrips from './pages/admin/AdminTrips'
 
@@ -59,9 +62,11 @@ export default function App() {
           <Route
             path="/admin"
             element={
-              <RequireAuth>
-                <AdminLayout />
-              </RequireAuth>
+              <ErrorBoundary>
+                <RequireAuth>
+                  <AdminLayout />
+                </RequireAuth>
+              </ErrorBoundary>
             }
           >
             <Route index element={<Navigate to="/admin/dashboard" replace />} />
@@ -74,6 +79,8 @@ export default function App() {
             <Route path="enquiries" element={<AdminEnquiries />} />
             <Route path="gallery" element={<AdminGallery />} />
             <Route path="reviews" element={<AdminReviews />} />
+            <Route path="faqs" element={<AdminFAQs />} />
+            <Route path="route-destinations" element={<AdminRouteDestinations />} />
             <Route path="reports" element={<AdminReports />} />
             <Route path="trip-history" element={<AdminTripHistory />} />
             <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />

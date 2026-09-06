@@ -97,6 +97,27 @@ service cloud.firestore {
       allow create, update, delete: if isTeamMember();
     }
 
+    /* ── FAQs ──────────────────────────────────────────────────────────── */
+    // Team members have full CRUD for admin management.
+    // Public can list all FAQs (the Home page displays them; the admin
+    // subscription fetches the full set regardless of isActive).
+
+    match /faqs/{faqId} {
+      allow get, list: if isTeamMember();
+      allow get, list: if true;
+      allow create, update, delete: if isTeamMember();
+    }
+
+    /* ── Route Destinations ──────────────────────────────────────────── */
+    // Team members have full CRUD for the South India by Road section.
+    // Public can list active stops for the Home page journey section.
+
+    match /routeDestinations/{stopId} {
+      allow get, list: if isTeamMember();
+      allow get, list: if true;
+      allow create, update, delete: if isTeamMember();
+    }
+
     /* ── Enquiries ───────────────────────────────────────────────────── */
     // Visitors may SUBMIT an enquiry and nothing else. The customer fields
     // are validated for type and size so the open form cannot be abused as a

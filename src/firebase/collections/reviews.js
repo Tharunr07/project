@@ -91,7 +91,7 @@ export async function deleteReview(review) {
 
 /** Mean rating of a review list, rounded to one decimal (Phase 1 formula). */
 export function averageRating(list) {
-  if (!list || list.length === 0) return 0
+  if (!Array.isArray(list) || list.length === 0) return 0
   return Math.round((list.reduce((sum, item) => sum + (Number(item.rating) || 0), 0) / list.length) * 10) / 10
 }
 

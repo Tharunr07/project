@@ -1,63 +1,18 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { img } from '../../data/images'
+import { imageUrl } from '../../data/images'
 import { destinations } from '../../data/destinations'
-
-const ROUTE_STOPS = [
-  {
-    id: 'ooty', name: 'Ooty', state: 'Tamil Nadu',
-    duration: '2N / 3D', price: '₹9,500',
-    image: img.greenHills,
-  },
-  {
-    id: 'kodaikanal', name: 'Kodaikanal', state: 'Tamil Nadu',
-    duration: '2N / 3D', price: '₹8,800',
-    image: img.heroMist,
-  },
-  {
-    id: 'munnar', name: 'Munnar', state: 'Kerala',
-    duration: '3N / 4D', price: '₹11,200',
-    image: img.teaEstate,
-  },
-  {
-    id: 'coorg', name: 'Coorg', state: 'Karnataka',
-    duration: '2N / 3D', price: '₹10,500',
-    image: img.forestPath,
-  },
-  {
-    id: 'pondicherry', name: 'Pondicherry', state: 'Puducherry',
-    duration: '2N / 3D', price: '₹8,200',
-    image: img.beach,
-  },
-  {
-    id: 'kerala', name: 'Kerala Backwaters', state: 'Kerala',
-    duration: '4N / 5D', price: '₹13,500',
-    image: img.keralaBoat,
-  },
-]
-
-const ROUTE_STATS = [
-  { value: '723 km', label: 'Total Distance', icon: '↗' },
-  { value: '19.5 hrs', label: 'Total Drive Time', icon: '◷' },
-  { value: '6', label: 'Destinations', icon: '◉' },
-  { value: '1', label: 'Epic Journey', icon: '◆' },
-]
+import {
+  SEED_ROUTE_DESTINATIONS,
+  ROUTE_STATS_DEFAULTS,
+  useActiveRouteDestinations,
+} from '../../firebase/collections/routeDestinations'
 
 const VIEWBOX_W = 1000
 const VIEWBOX_H = 720
 
 /* Straight horizontal road-trip path across South India */
 const ROUTE_PATH = 'M 140 420 L 860 420'
-
-/* Destination positions along the straight road */
-const DEST_POSITIONS = [
-  { x: 140, y: 420, cardDir: 'below' },        // 01 Ooty
-  { x: 284, y: 420, cardDir: 'above' },        // 02 Kodaikanal
-  { x: 428, y: 420, cardDir: 'below' },        // 03 Munnar
-  { x: 572, y: 420, cardDir: 'above' },        // 04 Coorg
-  { x: 716, y: 420, cardDir: 'below' },        // 05 Pondicherry
-  { x: 860, y: 420, cardDir: 'above' },        // 06 Kerala Backwaters
-]
 
 /* Geographically accurate South India State SVG Polygons & Coastlines */
 const KERALA_PATH = 'M 235 370 C 242 410, 255 450, 270 490 C 290 535, 320 590, 375 650 C 360 620, 345 565, 330 520 C 320 488, 310 455, 295 430 C 280 400, 268 382, 235 370 Z'
@@ -99,6 +54,39 @@ function getCardTransform(cardDir, offsetY = 0) {
   return `translate(-50%, ${offsetY}px)`
 }
 
+/**
+ * Compute evenly-spaced x positions across the road path.
+ * `count` stops are distributed between x=140 and x=860.
+ * Cards alternate above/below for visual clarity.
+ */
+function computeDestPositions(count) {
+  const startX = 140
+  const endX = 860
+  const y = 420
+  return Array.from({ length: count }, (_, i) => ({
+    x: count === 1 ? (startX + endX) / 2 : startX + (i / (count - 1)) * (endX - startX),
+    y,
+    cardDir: i % 2 === 0 ? 'below' : 'above',
+  }))
+}
+
+/**
+ * Build a normalised stop list from Firestore data (or seed fallback),
+ * resolving image keys to full CDN URLs.
+ */
+function buildStops(raw) {
+  return raw.map((d, i) => ({
+    id: d.id || String(i),
+    name: d.name || 'Untitled',
+    state: d.state || '',
+    image: imageUrl(d.image),
+    duration: d.duration || '',
+    price: d.price || '',
+    slug: d.slug || '',
+    routeProgress: d.routeProgress ?? Math.round((i / Math.max(1, raw.length - 1)) * 100),
+  }))
+}
+
 export default function BusRouteJourney() {
   const sectionRef = useRef(null)
   const pathRef = useRef(null)
@@ -115,12 +103,28 @@ export default function BusRouteJourney() {
   const smoothRef = useRef(0)
   const rafRef = useRef(null)
 
+  /* ── Firestore data ──────────────────────────────────────────────────── */
+  const { data: rawFiresotre, loading: _loading, error: _error } = useActiveRouteDestinations()
+
+  const stops = useMemo(() => {
+    const source = Array.isArray(rawFiresotre) && rawFiresotre.length > 0
+      ? rawFiresotre
+      : SEED_ROUTE_DESTINATIONS
+    return buildStops(source)
+  }, [rawFiresotre])
+
+  const numStops = stops.length
+
+  const destPositions = useMemo(() => computeDestPositions(numStops), [numStops])
+
   const destLinks = useMemo(() => (
-    ROUTE_STOPS.map((stop) => {
-      const dest = destinations.find((d) => d.id === stop.id)
-      return dest ? `/destinations/${dest.id}` : `/destinations/${stop.id}`
+    stops.map((stop) => {
+      const dest = destinations.find((d) => d.id === stop.slug)
+      return dest ? `/destinations/${dest.id}` : `/destinations/${stop.slug || stop.id}`
     })
-  ), [])
+  ), [stops])
+
+  /* ── Scroll + animation ──────────────────────────────────────────────── */
 
   useEffect(() => {
     const pathNode = pathRef.current
@@ -143,8 +147,8 @@ export default function BusRouteJourney() {
     if (prefersReduced) {
       smoothRef.current = 100
       targetRef.current = 100
-      activeIdxRef.current = ROUTE_STOPS.length - 1
-      setActiveIdx(ROUTE_STOPS.length - 1)
+      activeIdxRef.current = numStops - 1
+      setActiveIdx(numStops - 1)
 
       const endPt = pathNode.getPointAtLength(len)
       if (busRef.current) {
@@ -157,7 +161,7 @@ export default function BusRouteJourney() {
       if (glowRef.current) {
         glowRef.current.style.strokeDashoffset = '0'
       }
-      DEST_POSITIONS.forEach((pos, i) => {
+      destPositions.forEach((pos, i) => {
         const cardEl = document.getElementById(`dest-card-${i}`)
         if (cardEl) {
           cardEl.style.opacity = '1'
@@ -174,7 +178,7 @@ export default function BusRouteJourney() {
       })
       if (completionRef.current) completionRef.current.style.opacity = '1'
     }
-  }, [prefersReduced])
+  }, [prefersReduced, numStops, destPositions])
 
   useEffect(() => {
     if (prefersReduced) return undefined
@@ -209,7 +213,7 @@ export default function BusRouteJourney() {
       const current = smoothRef.current
       const next = Math.abs(target - current) < 0.05
         ? target
-        : lerp(current, target, 0.1)
+        : lerp(current, target, 0.06)
 
       smoothRef.current = next
 
@@ -239,11 +243,10 @@ export default function BusRouteJourney() {
         }
 
         const progressRatio = Math.min(1, Math.max(0, next / 100))
-        const numStops = ROUTE_STOPS.length
         const segs = numStops - 1
         const idx = Math.min(Math.floor(progressRatio * segs + 0.5), segs)
 
-        DEST_POSITIONS.forEach((pos, i) => {
+        destPositions.forEach((pos, i) => {
           const reached = i <= idx
           const glowEl = document.getElementById(`dest-glow-${pos.x}-${pos.y}`)
           if (glowEl) glowEl.setAttribute('fill', reached ? 'rgba(222,36,56,0.15)' : 'none')
@@ -265,12 +268,12 @@ export default function BusRouteJourney() {
               opacity = 1.0
               offsetY = 0
             } else if (i < idx) {
-              opacity = 0.6
+              opacity = 0.7
               offsetY = 0
             } else {
               const targetP = i / segs
-              const fadeStart = Math.max(0, targetP - 0.32)
-              const fadeEnd = targetP - 0.10
+              const fadeStart = Math.max(0, targetP - 0.50)
+              const fadeEnd = targetP - 0.20
 
               if (progressRatio <= fadeStart) {
                 opacity = 0
@@ -317,7 +320,7 @@ export default function BusRouteJourney() {
       running = false
       if (rafRef.current) cancelAnimationFrame(rafRef.current)
     }
-  }, [prefersReduced])
+  }, [prefersReduced, numStops, destPositions])
 
   useEffect(() => () => {
     if (rafRef.current) cancelAnimationFrame(rafRef.current)
@@ -341,7 +344,7 @@ export default function BusRouteJourney() {
                 South India, by road
               </p>
               <h2 className="font-['Fraunces',Georgia,serif] text-2xl font-bold text-[#fff2f1] sm:text-3xl lg:text-[2.25rem] xl:text-[2.5rem] lg:leading-[1.12]">
-                Six destinations.
+                {numStops} destinations.
               </h2>
               <h2 className="font-['Fraunces',Georgia,serif] text-2xl font-bold text-[#e3ae3c] sm:text-3xl lg:text-[2.25rem] xl:text-[2.5rem] lg:leading-[1.12]">
                 One unforgettable journey.
@@ -352,7 +355,7 @@ export default function BusRouteJourney() {
 
               {/* Desktop embedded statistics inside left side */}
               <div className="mt-6 hidden lg:grid grid-cols-2 gap-4 border-t border-white/[0.08] pt-5">
-                {ROUTE_STATS.map((stat) => (
+                {ROUTE_STATS_DEFAULTS.map((stat) => (
                   <div key={stat.label} className="flex flex-col">
                     <div className="flex items-center gap-1.5 text-[#de2438]">
                       <span className="text-xs">{stat.icon}</span>
@@ -379,7 +382,6 @@ export default function BusRouteJourney() {
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <defs>
-                    {/* Coastal edge glow filter */}
                     <filter id="coast-glow" x="-20%" y="-20%" width="140%" height="140%">
                       <feGaussianBlur stdDeviation="8" result="blur" />
                       <feComposite in="SourceGraphic" in2="blur" operator="over" />
@@ -399,70 +401,16 @@ export default function BusRouteJourney() {
                   <path d="M 200 50 L 200 680 M 400 50 L 400 680 M 600 50 L 600 680 M 800 50 L 800 680" stroke="rgba(255,255,255,0.02)" strokeWidth="1" strokeDasharray="4 8" />
 
                   {/* Subtle warm golden edge glow along South India Coastline */}
-                  <path
-                    d={COASTLINE_PATH}
-                    stroke="#e3ae3c"
-                    strokeWidth="6"
-                    strokeOpacity="0.14"
-                    fill="none"
-                    filter="url(#coast-glow)"
-                  />
-                  <path
-                    d={COASTLINE_PATH}
-                    stroke="#e3ae3c"
-                    strokeWidth="1.5"
-                    strokeOpacity="0.25"
-                    fill="none"
-                  />
+                  <path d={COASTLINE_PATH} stroke="#e3ae3c" strokeWidth="6" strokeOpacity="0.14" fill="none" filter="url(#coast-glow)" />
+                  <path d={COASTLINE_PATH} stroke="#e3ae3c" strokeWidth="1.5" strokeOpacity="0.25" fill="none" />
 
                   {/* ── State Polygons ───────────────────────────────── */}
-                  {/* Kerala */}
-                  <path
-                    d={KERALA_PATH}
-                    fill="url(#state-gradient)"
-                    stroke="rgba(255,255,255,0.12)"
-                    strokeWidth="1.2"
-                    strokeDasharray="3 3"
-                  />
-                  {/* Karnataka */}
-                  <path
-                    d={KARNATAKA_PATH}
-                    fill="url(#state-gradient)"
-                    stroke="rgba(255,255,255,0.12)"
-                    strokeWidth="1.2"
-                    strokeDasharray="3 3"
-                  />
-                  {/* Tamil Nadu */}
-                  <path
-                    d={TAMILNADU_PATH}
-                    fill="url(#state-gradient)"
-                    stroke="rgba(255,255,255,0.12)"
-                    strokeWidth="1.2"
-                    strokeDasharray="3 3"
-                  />
-                  {/* Andhra Pradesh */}
-                  <path
-                    d={ANDHRA_PATH}
-                    fill="rgba(255,255,255,0.008)"
-                    stroke="rgba(255,255,255,0.08)"
-                    strokeWidth="1"
-                    strokeDasharray="3 3"
-                  />
-                  {/* Telangana */}
-                  <path
-                    d={TELANGANA_PATH}
-                    fill="rgba(255,255,255,0.008)"
-                    stroke="rgba(255,255,255,0.08)"
-                    strokeWidth="1"
-                    strokeDasharray="3 3"
-                  />
-                  {/* Sri Lanka */}
-                  <path
-                    d={SRILANKA_PATH}
-                    fill="rgba(255,255,255,0.015)"
-                    stroke="rgba(255,255,255,0.08)"
-                    strokeWidth="1"
-                  />
+                  <path d={KERALA_PATH} fill="url(#state-gradient)" stroke="rgba(255,255,255,0.12)" strokeWidth="1.2" strokeDasharray="3 3" />
+                  <path d={KARNATAKA_PATH} fill="url(#state-gradient)" stroke="rgba(255,255,255,0.12)" strokeWidth="1.2" strokeDasharray="3 3" />
+                  <path d={TAMILNADU_PATH} fill="url(#state-gradient)" stroke="rgba(255,255,255,0.12)" strokeWidth="1.2" strokeDasharray="3 3" />
+                  <path d={ANDHRA_PATH} fill="rgba(255,255,255,0.008)" stroke="rgba(255,255,255,0.08)" strokeWidth="1" strokeDasharray="3 3" />
+                  <path d={TELANGANA_PATH} fill="rgba(255,255,255,0.008)" stroke="rgba(255,255,255,0.08)" strokeWidth="1" strokeDasharray="3 3" />
+                  <path d={SRILANKA_PATH} fill="rgba(255,255,255,0.015)" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
 
                   {/* ── State Typography Labels ──────────────────────── */}
                   <text x="270" y="580" fill="rgba(255,255,255,0.28)" fontSize="11" fontWeight="700" letterSpacing="3.5">KERALA</text>
@@ -484,43 +432,12 @@ export default function BusRouteJourney() {
                   </g>
 
                   {/* ── Road Surface (perspective depth) ──────────────── */}
-                  {/* Wide soft outer glow */}
-                  <path
-                    d={ROUTE_PATH}
-                    stroke="rgba(222,36,56,0.08)"
-                    strokeWidth="28"
-                    strokeLinecap="round"
-                    fill="none"
-                    style={{ filter: 'blur(10px)' }}
-                  />
-                  {/* Road shoulder / edge lines */}
-                  <path
-                    d={ROUTE_PATH}
-                    stroke="rgba(255,255,255,0.06)"
-                    strokeWidth="18"
-                    strokeLinecap="round"
-                    fill="none"
-                  />
-                  {/* Road surface */}
-                  <path
-                    d={ROUTE_PATH}
-                    stroke="rgba(40,35,30,0.9)"
-                    strokeWidth="14"
-                    strokeLinecap="round"
-                    fill="none"
-                  />
-                  {/* Center dashed line */}
-                  <path
-                    d={ROUTE_PATH}
-                    stroke="rgba(227,174,60,0.18)"
-                    strokeWidth="1.5"
-                    strokeDasharray="12 8"
-                    strokeLinecap="round"
-                    fill="none"
-                  />
+                  <path d={ROUTE_PATH} stroke="rgba(222,36,56,0.08)" strokeWidth="28" strokeLinecap="round" fill="none" style={{ filter: 'blur(10px)' }} />
+                  <path d={ROUTE_PATH} stroke="rgba(255,255,255,0.06)" strokeWidth="18" strokeLinecap="round" fill="none" />
+                  <path d={ROUTE_PATH} stroke="rgba(40,35,30,0.9)" strokeWidth="14" strokeLinecap="round" fill="none" />
+                  <path d={ROUTE_PATH} stroke="rgba(227,174,60,0.18)" strokeWidth="1.5" strokeDasharray="12 8" strokeLinecap="round" fill="none" />
 
                   {/* ── Base & Active Route Paths ─────────────────────── */}
-                  {/* Active glowing red travel path */}
                   <path
                     ref={pathRef}
                     d={ROUTE_PATH}
@@ -532,8 +449,6 @@ export default function BusRouteJourney() {
                     strokeDashoffset="1"
                     style={{ filter: 'drop-shadow(0 0 8px rgba(222,36,56,0.6))' }}
                   />
-
-                  {/* Route glow blur background */}
                   <path
                     ref={glowRef}
                     d={ROUTE_PATH}
@@ -547,8 +462,8 @@ export default function BusRouteJourney() {
                   />
 
                   {/* ── Destination Waypoint Dots ─────────────────────── */}
-                  {DEST_POSITIONS.map((pos, i) => (
-                    <g key={ROUTE_STOPS[i].id}>
+                  {destPositions.map((pos, i) => (
+                    <g key={stops[i]?.id ?? i}>
                       <circle id={`dest-glow-${pos.x}-${pos.y}`} cx={pos.x} cy={pos.y} r="16" fill="none" />
                       <circle
                         id={`dest-dot-${pos.x}-${pos.y}`}
@@ -580,8 +495,9 @@ export default function BusRouteJourney() {
                 </div>
 
                 {/* ── Destination Cards Overlay ──────────────────────── */}
-                {DEST_POSITIONS.map((pos, i) => {
-                  const stop = ROUTE_STOPS[i]
+                {destPositions.map((pos, i) => {
+                  const stop = stops[i]
+                  if (!stop) return null
                   const isVisited = i < activeIdx
                   const active = i === activeIdx
                   const left = `${(pos.x / VIEWBOX_W) * 100}%`
@@ -592,12 +508,6 @@ export default function BusRouteJourney() {
                     connectorStyle = 'left-1/2 -translate-x-1/2 -bottom-3.5 h-3.5'
                   } else if (pos.cardDir === 'below') {
                     connectorStyle = 'left-1/2 -translate-x-1/2 -top-3.5 h-3.5'
-                  } else if (pos.cardDir === 'above-right') {
-                    connectorStyle = 'left-0 -bottom-2 w-3.5 h-px'
-                  } else if (pos.cardDir === 'right') {
-                    connectorStyle = '-left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-px'
-                  } else if (pos.cardDir === 'left') {
-                    connectorStyle = '-right-3.5 top-1/2 -translate-y-1/2 w-3.5 h-px'
                   }
 
                   return (
@@ -746,7 +656,7 @@ export default function BusRouteJourney() {
               </div>
 
               <div className="relative space-y-4">
-                {ROUTE_STOPS.map((stop, i) => {
+                {stops.map((stop, i) => {
                   const reached = i <= activeIdx
                   const active = i === activeIdx
 
@@ -835,7 +745,7 @@ export default function BusRouteJourney() {
           {/* ── Bottom Statistics Bar for Mobile / Tablet ───────────── */}
           <div className="lg:hidden border-t border-white/[0.08] pt-3 pb-2">
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-0">
-              {ROUTE_STATS.map((stat) => (
+              {ROUTE_STATS_DEFAULTS.map((stat) => (
                 <div
                   key={stat.label}
                   className="flex flex-col items-center text-center sm:border-r sm:border-white/[0.08] sm:last:border-r-0 sm:px-2"
@@ -855,4 +765,3 @@ export default function BusRouteJourney() {
     </section>
   )
 }
-

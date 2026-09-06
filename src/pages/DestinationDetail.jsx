@@ -25,13 +25,11 @@ import { telLink, whatsappLink } from '../data/company'
 import { useDestination } from '../firebase/collections/destinations'
 import { usePublishedPackages } from '../firebase/collections/packages'
 import { usePublishedReviews } from '../firebase/collections/reviews'
-import { useReveal } from '../hooks'
 import { formatCurrency } from '../utils/format'
 import ReviewCard from '../components/cards/ReviewCard'
 
 export default function DestinationDetail() {
   const { id } = useParams()
-  const attractionsRef = useReveal()
 
   // Live Firestore subscription — single destination doc.
   const { data: fetchedDestination, loading, error, reload } = useDestination(id)
@@ -48,6 +46,12 @@ export default function DestinationDetail() {
         .slice(0, 3),
     }
   }, [fetchedDestination, publishedPackages, publishedReviews])
+
+  // Development-only diagnostic logging
+  if (import.meta.env.DEV && data) {
+    const attrs = data.destination.attractions
+    console.log(`[DestinationDetail] "${data.destination.name}" attractions:`, Array.isArray(attrs) ? attrs.length : typeof attrs, attrs)
+  }
 
   if (loading) {
     return (
@@ -83,6 +87,7 @@ export default function DestinationDetail() {
   }
 
   const { destination, packages, reviews: destinationReviews } = data
+  const attractions = Array.isArray(destination.attractions) ? destination.attractions : []
   const waMessage = `Hi Avengers Holidays, I'd like details and a quote for a ${destination.name} trip.`
 
   return (
@@ -234,23 +239,27 @@ export default function DestinationDetail() {
             lead="Every stop below appears in at least one of our itineraries, with entry tickets already included where applicable."
           />
 
-          <ol ref={attractionsRef} className="reveal mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {destination.attractions.map((attraction, index) => (
-              <li
-                key={attraction.name}
-                className="group relative rounded-3xl bg-white p-6 shadow-card transition-all duration-400 hover:-translate-y-1 hover:shadow-lift"
-              >
-                <span
-                  aria-hidden="true"
-                  className="font-display text-4xl font-extrabold text-sand-300 transition-colors duration-400 group-hover:text-crimson-200"
+          {attractions.length > 0 ? (
+            <ol className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {attractions.map((attraction, index) => (
+                <li
+                  key={attraction.name}
+                  className="group relative rounded-3xl bg-white p-6 shadow-card transition-all duration-400 hover:-translate-y-1 hover:shadow-lift"
                 >
-                  {String(index + 1).padStart(2, '0')}
-                </span>
-                <h3 className="mt-3 text-lg leading-snug text-navy-900">{attraction.name}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-navy-500">{attraction.note}</p>
-              </li>
-            ))}
-          </ol>
+                  <span
+                    aria-hidden="true"
+                    className="font-display text-4xl font-extrabold text-sand-300 transition-colors duration-400 group-hover:text-crimson-200"
+                  >
+                    {String(index + 1).padStart(2, '0')}
+                  </span>
+                  <h3 className="mt-3 text-lg leading-snug text-navy-900">{attraction.name}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-navy-500">{attraction.note}</p>
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <p className="mt-10 text-center text-sm text-navy-400">Attractions for this destination will appear here soon.</p>
+          )}
         </div>
       </section>
 

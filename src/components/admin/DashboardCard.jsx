@@ -22,7 +22,7 @@ export default function DashboardCard({ icon: Icon, label, value, delta = null, 
           aria-hidden="true"
           className={`grid size-11 place-content-center rounded-2xl ${TONES[tone] ?? TONES.navy}`}
         >
-          <Icon size={20} strokeWidth={2} />
+          {Icon && <Icon size={20} strokeWidth={2} />}
         </span>
 
         {delta !== null && (

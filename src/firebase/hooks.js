@@ -3,8 +3,11 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 /**
  * Firestore subscription hook — PHASE 2 replacement for useMockQuery().
  *
- * Same contract as useMockQuery: `{ data, loading, error, reload }`. The
- * subscriber receives `(onData, onError)` and returns an unsubscribe
+ * Returns `{ data, rows, loading, error, reload }`.
+ *   `data`  — the raw Firestore array (null while loading).
+ *   `rows`  — same array, defaulting to [] so callers never see undefined.
+ *
+ * The subscriber receives `(onData, onError)` and returns an unsubscribe
  * function (or nothing for one-shot promises). Because it mirrors the mock
  * contract, every screen keeps its existing skeletons, EmptyState and
  * ErrorState wiring unchanged.
@@ -22,10 +25,18 @@ export function useSubscription(subscribe, deps = []) {
     let cancelled = false
     setState((current) => ({ ...current, loading: true, error: null }))
 
-    const unsubscribe = subscribeRef.current(
-      (data) => !cancelled && setState({ data, loading: false, error: null }),
-      (error) => !cancelled && setState({ data: null, loading: false, error }),
-    )
+    let unsubscribe
+    try {
+      unsubscribe = subscribeRef.current(
+        (data) => !cancelled && setState({ data, loading: false, error: null }),
+        (error) => !cancelled && setState({ data: null, loading: false, error }),
+      )
+    } catch (error) {
+      if (!cancelled) {
+        console.error('[useSubscription] Synchronous error in subscribe function:', error)
+        setState({ data: null, loading: false, error })
+      }
+    }
 
     return () => {
       cancelled = true
@@ -35,5 +46,5 @@ export function useSubscription(subscribe, deps = []) {
   }, [...deps, nonce])
 
   const reload = useCallback(() => setNonce((value) => value + 1), [])
-  return { ...state, reload }
+  return { ...state, rows: state.data ?? [], reload }
 }

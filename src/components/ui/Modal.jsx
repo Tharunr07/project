@@ -54,7 +54,7 @@ export default function Modal({
         type="button"
         aria-label="Close dialog"
         data-modal-close
-        onClick={onClose}
+        onClick={() => onClose?.()}
         className="absolute inset-0 cursor-default bg-navy-950/65 backdrop-blur-sm animate-fade-in"
       />
 
@@ -82,7 +82,7 @@ export default function Modal({
                 </div>
                 <button
                   type="button"
-                  onClick={onClose}
+                  onClick={() => onClose?.()}
                   aria-label="Close"
                   className="-mr-1.5 -mt-1 grid size-9 shrink-0 place-content-center rounded-full text-navy-400 transition-colors hover:bg-sand-100 hover:text-navy-900"
                 >
