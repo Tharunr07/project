@@ -118,6 +118,16 @@ service cloud.firestore {
       allow create, update, delete: if isTeamMember();
     }
 
+    /* ── Happy Clients ─────────────────────────────────────────────── */
+    // Team members have full CRUD for Home Page marquee testimonials.
+    // Public can list active happy clients only.
+
+    match /happyClients/{clientId} {
+      allow get, list: if isTeamMember();
+      allow get, list: if resource.data.isActive == true;
+      allow create, update, delete: if isTeamMember();
+    }
+
     /* ── Enquiries ───────────────────────────────────────────────────── */
     // Visitors may SUBMIT an enquiry and nothing else. The customer fields
     // are validated for type and size so the open form cannot be abused as a

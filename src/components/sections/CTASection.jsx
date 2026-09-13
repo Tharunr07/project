@@ -119,7 +119,7 @@ export default function CTASection({
                 WhatsApp
               </a>
               <a
-                href="https://instagram.com/avengersholidays"
+                href="https://www.instagram.com/avengers_holidays?stkn=MXEydTk4dG43dmdrbA=="
                 target="_blank"
                 rel="noreferrer noopener"
                 className="inline-flex h-12 items-center gap-2 rounded-xl bg-gradient-to-br from-[#f09433] via-[#dc2743] to-[#bc1888] px-6 font-semibold text-white shadow-[0_2px_12px_rgba(220,39,67,0.25)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_4px_20px_rgba(220,39,67,0.35)] active:translate-y-0"

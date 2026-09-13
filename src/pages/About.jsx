@@ -146,6 +146,18 @@ export default function About() {
   // Live Firestore subscription — published destinations for the circuits list.
   const { data: publishedDestinations } = usePublishedDestinations()
 
+  const storyTextRef = useReveal()
+  const storyImageRef = useReveal({ rootMargin: '0px 0px -60px 0px' })
+  const statsRef = useReveal()
+  const servicesHeaderRef = useReveal()
+  const servicesGridRef = useReveal({ rootMargin: '0px 0px -40px 0px' })
+  const tripTypesHeaderRef = useReveal()
+  const tripTypesGridRef = useReveal({ rootMargin: '0px 0px -40px 0px' })
+  const coverageTextRef = useReveal()
+  const coveragePanelRef = useReveal({ rootMargin: '0px 0px -60px 0px' })
+  const whyHeaderRef = useReveal()
+  const missionRef = useReveal()
+
   return (
     <>
       <Hero
@@ -160,7 +172,7 @@ export default function About() {
       {/* Story */}
       <section className="shell py-12 sm:py-16 lg:py-20">
         <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
-          <div>
+          <div ref={storyTextRef} className="reveal">
             <SectionTitle
               eyebrow="Our story"
               title="It started with one college batch and a borrowed van"
@@ -202,7 +214,7 @@ export default function About() {
             </div>
           </div>
 
-          <div className="relative mx-auto w-full max-w-lg lg:max-w-none">
+          <div ref={storyImageRef} className="reveal relative mx-auto w-full max-w-lg lg:max-w-none" style={{ transitionDelay: '150ms' }}>
             <SmartImage
               src={img.groupTrek}
               alt="Avengers Holidays group on a Wayanad trek"
@@ -227,7 +239,7 @@ export default function About() {
 
       {/* Live-stat strip */}
       <section className="bg-navy-950 py-14 sm:py-16">
-        <div className="shell">
+        <div ref={statsRef} className="shell reveal">
           <SectionTitle
             align="center"
             tone="dark"
@@ -253,12 +265,14 @@ export default function About() {
 
       {/* Services */}
       <section className="shell py-12 sm:py-16 lg:py-20">
-        <SectionTitle
-          eyebrow="What we handle"
-          title="Everything between your doorstep and the summit"
-          lead="One team owns the whole chain — planning, transport, stays, food, tickets and support — so nothing gets lost between vendors."
-        />
-        <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div ref={servicesHeaderRef} className="reveal">
+          <SectionTitle
+            eyebrow="What we handle"
+            title="Everything between your doorstep and the summit"
+            lead="One team owns the whole chain — planning, transport, stays, food, tickets and support — so nothing gets lost between vendors."
+          />
+        </div>
+        <div ref={servicesGridRef} className="reveal mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3" style={{ transitionDelay: '100ms' }}>
           {SERVICES.map((service, index) => (
             <ServiceCard key={service.title} {...service} delay={index * 60} />
           ))}
@@ -268,12 +282,14 @@ export default function About() {
       {/* Trip types */}
       <section className="bg-white py-12 sm:py-16 lg:py-20">
         <div className="shell">
-          <SectionTitle
-            eyebrow="Who we travel with"
-            title="Six kinds of groups, one standard of care"
-            lead="Each group type gets its own playbook — pacing, food, safety and paperwork tuned to who is actually on the bus."
-          />
-          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <div ref={tripTypesHeaderRef} className="reveal">
+            <SectionTitle
+              eyebrow="Who we travel with"
+              title="Six kinds of groups, one standard of care"
+              lead="Each group type gets its own playbook — pacing, food, safety and paperwork tuned to who is actually on the bus."
+            />
+          </div>
+          <div ref={tripTypesGridRef} className="reveal mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3" style={{ transitionDelay: '100ms' }}>
             {TRIP_TYPES.map((item, index) => (
               <ServiceCard key={item.type} {...item} delay={index * 60} />
             ))}
@@ -284,7 +300,7 @@ export default function About() {
       {/* South India coverage */}
       <section className="shell py-12 sm:py-16 lg:py-20">
         <div className="grid items-center gap-10 lg:grid-cols-[1fr_1.15fr] lg:gap-16">
-          <div>
+          <div ref={coverageTextRef} className="reveal">
             <SectionTitle
               eyebrow="Where we go"
               title="All of South India, within a night's drive"
@@ -297,7 +313,7 @@ export default function About() {
             </p>
           </div>
 
-          <div className="rounded-4xl bg-white p-7 shadow-panel sm:p-9">
+          <div ref={coveragePanelRef} className="reveal rounded-4xl bg-white p-7 shadow-panel sm:p-9" style={{ transitionDelay: '150ms' }}>
             <p className="flex items-center gap-2 text-xs font-bold tracking-[0.16em] text-navy-400 uppercase">
               <TreePalm size={15} className="text-crimson-600" aria-hidden="true" />
               Signature circuits
@@ -334,12 +350,14 @@ export default function About() {
       {/* Why choose */}
       <section className="bg-white py-12 sm:py-16 lg:py-20">
         <div className="shell">
-          <SectionTitle
-            eyebrow="Why Avengers Holidays"
-            title="Four habits customers keep coming back for"
-            align="center"
-            className="mx-auto"
-          />
+          <div ref={whyHeaderRef} className="reveal">
+            <SectionTitle
+              eyebrow="Why Avengers Holidays"
+              title="Four habits customers keep coming back for"
+              align="center"
+              className="mx-auto"
+            />
+          </div>
           <div className="mx-auto mt-10 grid max-w-4xl gap-5 sm:grid-cols-2">
             {WHY_POINTS.map((point, index) => (
               <WhyRow key={point.title} index={index} {...point} />
@@ -354,7 +372,7 @@ export default function About() {
 
       {/* Mission / Vision */}
       <section className="shell pb-12 sm:pb-16 lg:pb-20">
-        <div className="grid gap-5 lg:grid-cols-2">
+        <div ref={missionRef} className="reveal grid gap-5 lg:grid-cols-2">
           <MissionCard
             eyebrow="Our mission"
             body={company.mission}

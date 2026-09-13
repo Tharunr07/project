@@ -25,7 +25,7 @@ export default function CustomerLayout() {
         pt-[4.5rem] pushes inner-page content below the navbar.
         scroll-padding-top on html handles anchor navigation offset.
       */}
-      <main id="main" className="flex-1 pt-[4.5rem]">
+      <main id="main" className="flex-1 pt-[7.25rem]">
         <Outlet />
       </main>
 

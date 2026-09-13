@@ -25,6 +25,7 @@ import AdminGallery from './pages/admin/AdminGallery'
 import AdminLogin from './pages/admin/AdminLogin'
 import AdminPackages from './pages/admin/AdminPackages'
 import AdminReports from './pages/admin/AdminReports'
+import AdminHappyClients from './pages/admin/AdminHappyClients'
 import AdminReviews from './pages/admin/AdminReviews'
 import AdminRouteDestinations from './pages/admin/AdminRouteDestinations'
 import AdminTripHistory from './pages/admin/AdminTripHistory'
@@ -79,6 +80,7 @@ export default function App() {
             <Route path="enquiries" element={<AdminEnquiries />} />
             <Route path="gallery" element={<AdminGallery />} />
             <Route path="reviews" element={<AdminReviews />} />
+            <Route path="happy-clients" element={<AdminHappyClients />} />
             <Route path="faqs" element={<AdminFAQs />} />
             <Route path="route-destinations" element={<AdminRouteDestinations />} />
             <Route path="reports" element={<AdminReports />} />

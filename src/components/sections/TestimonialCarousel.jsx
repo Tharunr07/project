@@ -1,241 +1,190 @@
-import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { imageUrl } from '../../data/images'
-import Rating from '../ui/Rating'
+import { useActiveHappyClients } from '../../firebase/collections/happyClients'
 import SmartImage from '../ui/SmartImage'
 
-const TESTI_BG = imageUrl('mountainRoad', 1600)
-const AUTOPLAY_MS = 5000
+const ADVANCE_MS = 2500
 
-const SLIDES = [
-  {
-    name: 'Priya & Arjun Mehta',
-    meta: 'Family trip · Munnar & Thekkady',
-    groupType: 'Family of 5',
-    review:
-      'Our family had the most wonderful time exploring Munnar and Thekkady. The kids loved the elephant sanctuary and we all enjoyed the houseboat ride. Avengers Holidays handled every detail — the resorts were beautiful, the driver was punctual and friendly, and we never once had to worry about logistics. It truly felt like a stress-free holiday.',
-    image: imageUrl('familyBeach', 1200),
-  },
-  {
-    name: 'Vikram Rajesh & Friends',
-    meta: 'Group trip · Coorg & Wayanad',
-    groupType: 'Friends group of 8',
-    review:
-      'Eight of us booked a weekend escape to Coorg and Wayanad, and the whole trip was seamlessly organised. The jungle safari, the coffee plantation walk, the campfire night — every activity was perfectly timed. What impressed us most was how the team adapted on the fly when one campsite was fully booked and upgraded us without any hassle.',
-    image: imageUrl('friendsVan', 1200),
-  },
-  {
-    name: 'Loyola College, Chennai',
-    meta: 'College trip · Ooty & Coonoor',
-    groupType: 'Student group of 42',
-    review:
-      'Our college group of 42 students had an incredible time in Ooty and Coonoor. Avengers Holidays managed the entire itinerary — buses, meals, accommodation, and activities — without a single hiccup. The students loved the toy train ride and the botanical gardens. The coordination was top-notch and the pricing was very student-friendly.',
-    image: imageUrl('hillRailway', 1200),
-  },
-]
 
 export default function TestimonialCarousel() {
+  const { data: clients, loading, error } = useActiveHappyClients()
+  const list = useMemo(() => clients ?? [], [clients])
+  const total = list.length
+
   const [active, setActive] = useState(0)
-  const [transitioning, setTransitioning] = useState(false)
   const [paused, setPaused] = useState(false)
-  const sectionRef = useRef(null)
+  const [reducedMotion, setReducedMotion] = useState(false)
   const timerRef = useRef(null)
-  const [inView, setInView] = useState(false)
 
-  const total = SLIDES.length
-
-  /* Respect prefers-reduced-motion */
-  const reducedMotion = useMemo(() => {
-    if (typeof window === 'undefined') return false
-    return window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  }, [])
-
-  /* IntersectionObserver — only animate when visible */
   useEffect(() => {
-    const node = sectionRef.current
-    if (!node) return undefined
-    const io = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) setInView(true) },
-      { threshold: 0.15 },
-    )
-    io.observe(node)
-    return () => io.disconnect()
+    if (typeof window === 'undefined') return
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
+    setReducedMotion(mq.matches)
+    const handler = (e) => setReducedMotion(e.matches)
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
   }, [])
 
-  const goTo = useCallback((index) => {
-    if (transitioning || index === active) return
-    setTransitioning(true)
-    setTimeout(() => {
-      setActive(index)
-      setTimeout(() => setTransitioning(false), 50)
-    }, reducedMotion ? 0 : 400)
-  }, [active, transitioning, reducedMotion])
+  const advance = useCallback(() => {
+    if (total <= 1) return
+    setActive((p) => (p + 1) % total)
+  }, [total])
+
+  useEffect(() => {
+    clearInterval(timerRef.current)
+    if (!paused && !reducedMotion && total > 1) {
+      timerRef.current = setInterval(advance, ADVANCE_MS)
+    }
+    return () => clearInterval(timerRef.current)
+  }, [paused, reducedMotion, total, advance])
+
+  const go = useCallback(
+    (idx) => {
+      setActive(idx)
+      clearInterval(timerRef.current)
+      if (!paused && total > 1) {
+        timerRef.current = setInterval(advance, ADVANCE_MS)
+      }
+    },
+    [paused, total, advance],
+  )
 
   const prev = useCallback(() => {
-    goTo(active === 0 ? total - 1 : active - 1)
-  }, [active, total, goTo])
+    if (total <= 1) return
+    go((active - 1 + total) % total)
+  }, [active, total, go])
 
-  const next = useCallback(() => {
-    goTo(active === total - 1 ? 0 : active + 1)
-  }, [active, total, goTo])
+  const nextSlide = useCallback(() => {
+    if (total <= 1) return
+    go((active + 1) % total)
+  }, [active, total, go])
 
-  /* Autoplay timer */
   useEffect(() => {
-    if (reducedMotion || paused || transitioning) {
-      clearInterval(timerRef.current)
-      timerRef.current = null
-      return undefined
+    const onKey = (e) => {
+      if (e.key === 'ArrowLeft') prev()
+      else if (e.key === 'ArrowRight') nextSlide()
     }
-    timerRef.current = setInterval(() => {
-      setActive((cur) => (cur === total - 1 ? 0 : cur + 1))
-      setTransitioning(true)
-      setTimeout(() => setTransitioning(false), 50)
-    }, AUTOPLAY_MS)
-    return () => clearInterval(timerRef.current)
-  }, [paused, transitioning, reducedMotion, total])
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [nextSlide, prev])
 
-  /* Pause on hover */
   const onEnter = useCallback(() => setPaused(true), [])
   const onLeave = useCallback(() => setPaused(false), [])
 
-  const slide = SLIDES[active]
+  const activeClient = list[active] ?? null
 
   return (
-    <section
-      ref={sectionRef}
-      onMouseEnter={onEnter}
-      onMouseLeave={onLeave}
-      className={`testi-editorial ${inView ? 'testi-editorial--in' : ''}`}
-    >
-      {/* Dark travel background */}
-      <div
-        aria-hidden="true"
-        className="absolute inset-0 -z-20 bg-cover bg-center bg-no-repeat opacity-30"
-        style={{ backgroundImage: `url(${TESTI_BG})` }}
-      />
+    <section className="hc-section">
+      <div className="hc-section__bg" aria-hidden="true">
+        <div className="hc-grid" />
+      </div>
 
-      {/* Dark vignette overlay */}
-      <span
-        aria-hidden="true"
-        className="absolute inset-0 -z-10"
-        style={{
-          background:
-            'radial-gradient(ellipse 70% 60% at 50% 40%, rgba(8,8,10,0.50) 0%, rgba(6,6,8,0.75) 60%, rgba(4,4,6,0.90) 100%)',
-        }}
-      />
-
-      {/* Subtle crimson glow — upper-right */}
-      <span
-        aria-hidden="true"
-        className="absolute -top-20 -right-16 -z-[5] size-[26rem] rounded-full bg-crimson-600/[0.08] blur-[100px]"
-      />
-      {/* Subtle amber glow — lower-left */}
-      <span
-        aria-hidden="true"
-        className="absolute -bottom-24 -left-20 -z-[5] size-[22rem] rounded-full bg-amber-500/[0.06] blur-[90px]"
-      />
-
-      <div className="shell relative z-10 px-4 sm:px-6">
-        {/* ---- Editorial header ---- */}
-        <div className="testi-editorial__header">
-          <p className="testi-editorial__eyebrow">Happy clients</p>
-          <h2 className="testi-editorial__heading">Memories that made the journey worth it.</h2>
-          <p className="testi-editorial__lead">
-            Real experiences from students, teachers, and coordinators who travelled with Avengers Holidays.
+      <div className="hc-section__inner">
+        <div className="hc-header">
+          <p className="hc-header__eyebrow">Memorable journeys. Happy travellers.</p>
+          <h2 className="hc-header__title">HAPPY CLIENTS</h2>
+          <p className="hc-header__lead">
+            Experiences from groups who travelled with Avengers Holidays.
           </p>
         </div>
 
-        {/* ---- Carousel body ---- */}
-        <div className="testi-editorial__body">
-          {/* LEFT: quote + info */}
-          <div className="testi-editorial__content">
-            {/* Large decorative quote */}
-            <span aria-hidden="true" className="testi-editorial__quote-mark">&ldquo;</span>
-
-            {/* Testimonial text — crossfade */}
-            <blockquote
-              className={`testi-editorial__text ${!transitioning ? 'testi-editorial__text--in' : ''}`}
-            >
-              {slide.review}
-            </blockquote>
-
-            {/* Traveller info — crossfade */}
-            <div className={`testi-editorial__traveller ${!transitioning ? 'testi-editorial__traveller--in' : ''}`}>
-              <div className="testi-editorial__avatar">
-                <span className="grid size-full place-content-center rounded-full text-sm font-bold text-bone-100 bg-white/10">
-                  {slide.name.split(' ').map((w) => w[0]).join('').slice(0, 2)}
-                </span>
-              </div>
-
-              <div>
-                <p className="testi-editorial__name">{slide.name}</p>
-                <p className="testi-editorial__meta">
-                  {slide.meta}
-                  {slide.groupType && <>{' · '}{slide.groupType}</>}
-                </p>
-              </div>
-
-              <div className="ml-auto">
-                <Rating value={5} size="sm" />
-              </div>
-            </div>
+        {loading ? (
+          <div className="hc-gallery" aria-label="Loading testimonials">
+            <div className="skeleton hc-skeleton-center" />
           </div>
-
-          {/* RIGHT: image — crossfade */}
-          <div className="testi-editorial__image-wrap">
+        ) : error ? (
+          <div className="hc-empty">Could not load testimonials</div>
+        ) : list.length === 0 ? (
+          <div className="hc-empty">Testimonials will appear here once published.</div>
+        ) : (
+          <>
+            {/* Logo Gallery */}
             <div
-              className="testi-editorial__image-inner testi-editorial__image-inner--in"
-              style={{ transition: `opacity ${reducedMotion ? '0s' : '0.6s'} ease` }}
+              className="hc-gallery"
             >
-              <SmartImage
-                src={slide.image}
-                alt={`Travel photo — ${slide.meta}`}
-                className="testi-editorial__img testi-editorial__img--ready"
-              />
+              {list.map((client, i) => {
+                let offset = i - active
+                if (offset > total / 2) offset -= total
+                if (offset < -total / 2) offset += total
+
+                const absOffset = Math.abs(offset)
+                const isLeft = offset < 0
+                const sign = isLeft ? 1 : (offset > 0 ? -1 : 0)
+
+                const photoSrc = `/logo${(i % 5) + 1}.jpg`
+                return (
+                  <div
+                    key={client.id}
+                    className={`hc-photo ${absOffset === 0 ? 'hc-photo--active' : ''}`}
+                    onClick={() => absOffset !== 0 && go(i)}
+                    role={absOffset !== 0 ? 'button' : undefined}
+                    tabIndex={absOffset !== 0 ? 0 : undefined}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && absOffset !== 0) go(i)
+                    }}
+                    aria-label={
+                      absOffset !== 0 ? `View ${client.organizationName}` : undefined
+                    }
+                    data-offset={offset}
+                    data-abs-offset={absOffset}
+                    style={{
+                      '--offset': offset,
+                      '--abs-offset': absOffset,
+                      '--sign': sign,
+                    }}
+                  >
+                    {photoSrc ? (
+                      <SmartImage
+                        src={photoSrc}
+                        alt={`${client.organizationName} photo`}
+                        className="hc-photo-img"
+                        loading={absOffset <= 2 ? 'eager' : 'lazy'}
+                      />
+                    ) : (
+                      <div
+                        className="hc-photo-img hc-logo-frame--fallback"
+                        style={{ display: 'grid', placeContent: 'center' }}
+                      >
+                        <span>{client.organizationName?.slice(0, 2).toUpperCase()}</span>
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
             </div>
-          </div>
-        </div>
 
-        {/* ---- Navigation ---- */}
-        <div className="testi-editorial__nav">
-          <button
-            type="button"
-            onClick={prev}
-            aria-label="Previous testimonial"
-            className="testi-editorial__nav-btn"
-          >
-            <ChevronLeft size={18} strokeWidth={2} aria-hidden="true" />
-            <span>Previous</span>
-          </button>
+            {/* Client Info */}
+            {activeClient && (
+              <div className="hc-info" key={activeClient.id}>
+                <p className="hc-info__name">{activeClient.organizationName}</p>
+                <p className="hc-info__type">
+                  {activeClient.organizationType}
+                  {activeClient.tripType && <> · {activeClient.tripType}</>}
+                </p>
+                {activeClient.review && (
+                  <p className="hc-info__review">&ldquo;{activeClient.review}&rdquo;</p>
+                )}
+                {activeClient.location && (
+                  <p className="hc-info__location">{activeClient.location}</p>
+                )}
+              </div>
+            )}
 
-          <div className="testi-editorial__counter">
-            <span className="testi-editorial__counter-current">
-              {String(active + 1).padStart(2, '0')}
-            </span>
-            <span className="testi-editorial__counter-sep">/</span>
-            <span className="testi-editorial__counter-total">
-              {String(total).padStart(2, '0')}
-            </span>
-          </div>
-
-          <button
-            type="button"
-            onClick={next}
-            aria-label="Next testimonial"
-            className="testi-editorial__nav-btn"
-          >
-            <span>Next</span>
-            <ChevronRight size={18} strokeWidth={2} aria-hidden="true" />
-          </button>
-        </div>
-
-        {/* ---- Progress line ---- */}
-        <div className="testi-editorial__progress">
-          <div
-            className="testi-editorial__progress-fill"
-            style={{ width: `${((active + 1) / total) * 100}%` }}
-          />
-        </div>
+            {/* Dots */}
+            {total > 1 && (
+              <div className="hc-dots">
+                {list.map((client, i) => (
+                  <button
+                    key={client.id}
+                    type="button"
+                    onClick={() => go(i)}
+                    className={`hc-dot ${i === active ? 'hc-dot--active' : ''}`}
+                    aria-label={`Go to ${client.organizationName}`}
+                  />
+                ))}
+              </div>
+            )}
+          </>
+        )}
       </div>
     </section>
   )

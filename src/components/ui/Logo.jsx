@@ -10,7 +10,7 @@ import { company } from '../../data/company'
 const SIZES = {
   sm: { box: 32, title: 'text-[0.9375rem]', sub: 'text-[0.5rem]' },
   md: { box: 40, title: 'text-lg', sub: 'text-[0.5625rem]' },
-  lg: { box: 52, title: 'text-2xl', sub: 'text-[0.6875rem]' },
+  lg: { box: 56, title: 'text-[1.375rem]', sub: 'text-[0.625rem]' },
 }
 
 export function LogoMark({ size = 40, className = '' }) {

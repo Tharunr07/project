@@ -1,45 +1,25 @@
-import {
-  BadgeCheck,
-  Bus,
-  CalendarCheck,
-  Compass,
-  Flame,
-  HeartHandshake,
-  Hotel,
-  IndianRupee,
-  MapPinned,
-  Mountain,
-  Route,
-  Ship,
-  Sunrise,
-  TrainFront,
-  TreePalm,
-  Users,
-} from 'lucide-react'
+import { MapPinned, Route, Users, CalendarCheck } from 'lucide-react'
 import { useMemo } from 'react'
 import DestinationCard from '../components/cards/DestinationCard'
+import PackageCard from '../components/cards/PackageCard'
 import StatsCard from '../components/cards/StatsCard'
 import CTASection from '../components/sections/CTASection'
 import FAQSection from '../components/sections/FAQSection'
 import CompanyIntroSection from '../components/sections/CompanyIntroSection'
-import GalleryPreview from '../components/sections/GalleryPreview'
 import CinematicHero from '../components/sections/CinematicHero'
 import TestimonialCarousel from '../components/sections/TestimonialCarousel'
 import BusRouteJourney from '../components/sections/BusRouteJourney'
-import TravellerBusInterior from '../components/sections/TravellerBusInterior'
 import TrustStrip from '../components/sections/TrustStrip'
 import Button from '../components/ui/Button'
 import SectionTitle from '../components/ui/SectionTitle'
-import SmartImage from '../components/ui/SmartImage'
 import { company } from '../data/company'
-import { img } from '../data/images'
-import {
-  averageRating as computeAverage,
-  usePublishedReviews,
-} from '../firebase/collections/reviews'
+import { usePublishedReviews } from '../firebase/collections/reviews'
 import { usePublishedDestinations } from '../firebase/collections/destinations'
+import { usePublishedPackages } from '../firebase/collections/packages'
+import { Flame, Mountain, Ship, Sunrise, TrainFront, TreePalm } from 'lucide-react'
+import SmartImage from '../components/ui/SmartImage'
+import { img } from '../data/images'
 import { useReveal } from '../hooks'
-import { formatNumber } from '../utils/format'
 
 const STAT_ICONS = {
   travellers: Users,
@@ -47,39 +27,6 @@ const STAT_ICONS = {
   destinations: MapPinned,
   trips: Route,
 }
-
-const REASONS = [
-  {
-    icon: Compass,
-    title: 'Our own coordinators on the ground',
-    body: 'Every group travels with an Avengers Holidays coordinator who knows the route, the hotel manager and the shortcut around the afternoon traffic. Nothing is handed to a third-party agent.',
-  },
-  {
-    icon: IndianRupee,
-    title: 'The quote you get is the price you pay',
-    body: 'One written quote covering stay, travel, meals and entry tickets. No service charge appearing at check-in and no “driver bata extra” at the end of the trip.',
-  },
-  {
-    icon: Hotel,
-    title: 'Hotels we have actually stayed in',
-    body: 'We inspect every property before it enters an itinerary and re-check it each season. If a hotel slips, it comes off the list — even if it is the cheapest option available.',
-  },
-  {
-    icon: Bus,
-    title: 'Vehicles matched to your group',
-    body: 'From a 6-seater Innova to a 45-seat coach, with hill-route drivers who have run the Nilgiris and the Western Ghats for years. Toll, parking and permits are already in the price.',
-  },
-  {
-    icon: HeartHandshake,
-    title: 'Built for groups, not just couples',
-    body: 'College batches of 120, school excursions, corporate offsites and joint families — rooming lists, meal counts and split coaches are routine work for us, not a special request.',
-  },
-  {
-    icon: BadgeCheck,
-    title: `${company.stats[1].value} years, still answering the phone`,
-    body: `Operating since ${company.since} with a 24×7 support line that stays open for the entire duration of your trip — not only during office hours.`,
-  },
-]
 
 const HIGHLIGHTS = [
   {
@@ -126,28 +73,6 @@ const HIGHLIGHTS = [
   },
 ]
 
-function ReasonCard({ reason, index }) {
-  const ref = useReveal()
-  const Icon = reason.icon
-
-  return (
-    <article
-      ref={ref}
-      className="reveal group rounded-3xl bg-white p-6 shadow-card transition-all duration-400 hover:-translate-y-1 hover:shadow-lift sm:p-7"
-      style={{ transitionDelay: `${index * 60}ms` }}
-    >
-      <span
-        aria-hidden="true"
-        className="grid size-12 place-content-center rounded-2xl bg-crimson-50 text-crimson-600 transition-colors duration-400 group-hover:bg-crimson-600 group-hover:text-white"
-      >
-        <Icon size={22} strokeWidth={1.9} />
-      </span>
-      <h3 className="mt-5 text-lg leading-snug text-navy-900">{reason.title}</h3>
-      <p className="mt-2.5 text-sm leading-relaxed text-navy-500">{reason.body}</p>
-    </article>
-  )
-}
-
 function HighlightTile({ item, index }) {
   const ref = useReveal()
   const Icon = item.icon
@@ -185,13 +110,17 @@ function HighlightTile({ item, index }) {
 
 
 export default function Home() {
-  const processRef = useReveal()
-
-  // Live Firestore data — published destinations and reviews only.
+  // Live Firestore data — published destinations, reviews and packages only.
   const { data: publishedDestinations } = usePublishedDestinations()
   const { data: publishedReviews } = usePublishedReviews()
+  const { data: publishedPackages } = usePublishedPackages()
 
-  const averageRating = computeAverage(publishedReviews)
+  const averageRating = useMemo(() => {
+    if (!publishedReviews || publishedReviews.length === 0) return 0
+    const total = publishedReviews.reduce((sum, r) => sum + (Number(r.rating) || 0), 0)
+    return total / publishedReviews.length
+  }, [publishedReviews])
+
   const reviewCount = (publishedReviews ?? []).length
   const featuredReviews = useMemo(
     () => (publishedReviews ?? []).filter((review) => review.featured),
@@ -203,14 +132,23 @@ export default function Home() {
     [publishedDestinations],
   )
 
+  const featuredPackages = useMemo(
+    () => (publishedPackages ?? []).filter((pkg) => pkg.featured || pkg.popular).slice(0, 6),
+    [publishedPackages],
+  )
+
   return (
     <>
+      {/* ── 1. Cinematic Hero ──────────────────────────────────────────── */}
       <CinematicHero />
 
-      {/* ------------------------------------------------------- trust strip */}
+      {/* ── 2. About Avengers / Company Introduction ───────────────────── */}
+      <CompanyIntroSection />
+
+      {/* ── 3. Trust Strip ─────────────────────────────────────────────── */}
       <TrustStrip averageRating={averageRating} reviewCount={reviewCount} />
 
-      {/* ---------------------------------------------------------------- stats */}
+      {/* ── 4. Statistics ──────────────────────────────────────────────── */}
       <section className="bg-ink-950 py-10 sm:py-12 lg:py-14">
         <div className="shell">
           <div className="mb-6 lg:mb-8">
@@ -246,7 +184,15 @@ export default function Home() {
         </div>
       </section>
 
-      {/* --------------------------------------------------------- destinations */}
+      {/* ── 5. Happy Clients / Testimonials ────────────────────────────── */}
+      <section>
+        <TestimonialCarousel reviews={featuredReviews} />
+      </section>
+
+      {/* ── 6. Destination Bus / South India Journey ───────────────────── */}
+      <BusRouteJourney />
+
+      {/* ── 7. Destinations ───────────────────────────────────────────── */}
       <section className="shell py-16 sm:py-20 lg:py-24">
         <div className="flex flex-wrap items-end justify-between gap-6">
           <SectionTitle
@@ -270,31 +216,35 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ------------------------------------------------------- bus route journey */}
-      <BusRouteJourney />
-
-      {/* -------------------------------------------------- traveller bus interior */}
-      <TravellerBusInterior />
-
-      {/* ------------------------------------------------------------ why us */}
+      {/* ── 8. Packages ───────────────────────────────────────────────── */}
       <section className="bg-sand-100 py-16 sm:py-20 lg:py-24">
         <div className="shell">
-          <SectionTitle
-            eyebrow="Why choose Avengers Holidays"
-            title="A travel agency that answers for the whole trip, not just the booking"
-            lead="Anyone can send you a rate list. The difference shows up on day two, when the weather turns or a hotel gets it wrong — and someone has to fix it before your group notices."
-            align="center"
-          />
-
-          <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
-            {REASONS.map((reason, index) => (
-              <ReasonCard key={reason.title} reason={reason} index={index} />
-            ))}
+          <div className="flex flex-wrap items-end justify-between gap-6">
+            <SectionTitle
+              eyebrow="Popular packages"
+              title="Ready itineraries you can book today"
+              lead="Every package includes stay, travel, listed meals and entry tickets. Prices are per person on twin sharing."
+            />
+            <Button to="/packages" variant="outline" size="md">
+              View All Packages
+            </Button>
           </div>
+
+          {featuredPackages.length > 0 ? (
+            <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {featuredPackages.map((pkg, index) => (
+                <PackageCard key={pkg.id} pkg={pkg} delay={index * 70} />
+              ))}
+            </div>
+          ) : (
+            <div className="mt-12 text-center">
+              <p className="text-sm text-navy-400">Packages will appear here once published.</p>
+            </div>
+          )}
         </div>
       </section>
 
-      {/* -------------------------------------------------------- highlights */}
+      {/* ── 9. Trip Highlights / Adventure Holidays ────────────────────── */}
       <section className="shell py-16 sm:py-20 lg:py-24">
         <SectionTitle
           eyebrow="Trip highlights"
@@ -309,96 +259,10 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ----------------------------------------------------------- process */}
-      <section className="shell py-16 sm:py-20 lg:py-24">
-        <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
-          <div ref={processRef} className="reveal relative">
-            <SmartImage
-              src={img.groupTrek}
-              alt="An Avengers Holidays group on a guided trail"
-              ratio="aspect-4/5"
-              className="rounded-4xl shadow-lift"
-            />
-            <div className="absolute -right-2 -bottom-6 w-56 rounded-3xl bg-white p-5 shadow-lift sm:-right-6 sm:w-64">
-              <p className="font-display text-3xl font-extrabold text-navy-900">
-                {formatNumber(company.stats[3].value)}+
-              </p>
-              <p className="mt-1 text-xs font-bold tracking-wide text-navy-400 uppercase">
-                Group trips operated
-              </p>
-              <p className="mt-3 text-[0.8125rem] leading-relaxed text-navy-500">
-                Colleges, schools, families and corporate teams across {company.stats[2].value}+
-                destinations.
-              </p>
-            </div>
-          </div>
-
-          <div>
-            <SectionTitle
-              eyebrow="How it works"
-              title="Four steps from a phone call to a trip that runs itself"
-            />
-
-            <ol className="mt-10 space-y-8">
-              {[
-                {
-                  title: 'Tell us the group and the dates',
-                  body: 'A call, a WhatsApp message or the enquiry form — whichever is easiest. We need the group size, rough dates and what kind of trip you want.',
-                },
-                {
-                  title: 'We send a costed itinerary',
-                  body: 'A day-by-day plan with the hotel category, the vehicle, the meals and the exact per-person price. Usually within a few working hours.',
-                },
-                {
-                  title: 'You adjust it until it fits',
-                  body: 'Swap a day, upgrade the hotel, add a destination, trim the budget. The revised quote comes back the same day.',
-                },
-                {
-                  title: 'We run the trip',
-                  body: 'Confirmed vouchers, a coordinator assigned to your group and a support line that stays open until everyone is home.',
-                },
-              ].map((step, index) => (
-                <li key={step.title} className="flex gap-5">
-                  <span
-                    aria-hidden="true"
-                    className="grid size-11 shrink-0 place-content-center rounded-2xl bg-navy-900 font-display text-base font-bold text-gold-400"
-                  >
-                    {index + 1}
-                  </span>
-                  <div>
-                    <h3 className="text-lg text-navy-900">{step.title}</h3>
-                    <p className="mt-1.5 text-sm leading-relaxed text-navy-500">{step.body}</p>
-                  </div>
-                </li>
-              ))}
-            </ol>
-
-            <div className="mt-10 flex flex-wrap gap-3">
-              <Button to="/enquire" variant="primary" size="md">
-                Start an Enquiry
-              </Button>
-              <Button to="/about" variant="ghost" size="md">
-                More about us
-              </Button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ------------------------------------------------------- testimonials */}
-      <section>
-        <TestimonialCarousel reviews={featuredReviews} />
-      </section>
-
-      {/* ---------------------------------------------------- gallery preview */}
-      <GalleryPreview />
-
-      {/* -------------------------------------------------- company intro */}
-      <CompanyIntroSection />
-
+      {/* ── 10. Final CTA ─────────────────────────────────────────────── */}
       <CTASection />
 
-      {/* ------------------------------------------------------------ faq */}
+      {/* ── 11. FAQ ───────────────────────────────────────────────────── */}
       <FAQSection />
     </>
   )

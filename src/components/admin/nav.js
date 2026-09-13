@@ -46,6 +46,7 @@ export const NAV_SECTIONS = [
     items: [
       { to: '/admin/gallery', label: 'Gallery', icon: Images },
       { to: '/admin/reviews', label: 'Reviews', icon: Star },
+      { to: '/admin/happy-clients', label: 'Happy Clients', icon: Star },
       { to: '/admin/faqs', label: 'FAQs', icon: HelpCircle },
       { to: '/admin/route-destinations', label: 'Route Stops', icon: Route },
     ],
