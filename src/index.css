@@ -1369,8 +1369,8 @@
 .hc-photo[data-abs-offset="0"] {
   left: 50%;
   transform: translate(-50%, -50%) rotateY(0deg);
-  width: 450px;
-  height: 450px;
+  width: 380px;
+  height: 380px;
   z-index: 5;
   opacity: 1;
   cursor: default;
@@ -1381,8 +1381,8 @@
 .hc-photo[data-abs-offset="1"] {
   left: calc(50% - (24% * var(--sign)));
   transform: translate(-50%, -50%) rotateY(calc(15deg * var(--sign)));
-  width: 270px;
-  height: 270px;
+  width: 230px;
+  height: 230px;
   z-index: 4;
   opacity: 1;
 }
@@ -1391,8 +1391,8 @@
 .hc-photo[data-abs-offset="2"] {
   left: calc(50% - (40% * var(--sign)));
   transform: translate(-50%, -50%) rotateY(calc(25deg * var(--sign)));
-  width: 160px;
-  height: 160px;
+  width: 140px;
+  height: 140px;
   z-index: 3;
   opacity: 0.75;
 }
@@ -1410,35 +1410,35 @@
 
 @media (min-width: 48rem) {
   .hc-photo[data-abs-offset="0"] {
-    width: 450px;
-    height: 450px;
+    width: 380px;
+    height: 380px;
   }
   .hc-photo[data-abs-offset="1"] {
     left: calc(50% - (26% * var(--sign)));
-    width: 270px;
-    height: 270px;
+    width: 230px;
+    height: 230px;
   }
   .hc-photo[data-abs-offset="2"] {
     left: calc(50% - (42% * var(--sign)));
-    width: 160px;
-    height: 160px;
+    width: 140px;
+    height: 140px;
   }
 }
 
 @media (min-width: 64rem) {
   .hc-photo[data-abs-offset="0"] {
-    width: 600px;
-    height: 600px;
+    width: 500px;
+    height: 500px;
   }
   .hc-photo[data-abs-offset="1"] {
     left: calc(50% - (24% * var(--sign)));
-    width: 360px;
-    height: 360px;
+    width: 300px;
+    height: 300px;
   }
   .hc-photo[data-abs-offset="2"] {
     left: calc(50% - (40% * var(--sign)));
-    width: 210px;
-    height: 210px;
+    width: 175px;
+    height: 175px;
   }
 }
 
@@ -1543,18 +1543,18 @@
   .hc-gallery { height: 85vw; }
 
   .hc-photo[data-abs-offset="0"] {
-    width: 65vw;
-    height: 65vw;
+    width: 55vw;
+    height: 55vw;
   }
   .hc-photo[data-abs-offset="1"] {
     left: calc(50% - (30% * var(--sign)));
-    width: 40vw;
-    height: 40vw;
+    width: 34vw;
+    height: 34vw;
   }
   .hc-photo[data-abs-offset="2"] {
     left: calc(50% - (48% * var(--sign)));
-    width: 24vw;
-    height: 24vw;
+    width: 20vw;
+    height: 20vw;
   }
 
   .hc-info__name { font-size: 1.125rem; }

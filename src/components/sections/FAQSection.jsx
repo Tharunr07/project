@@ -53,11 +53,11 @@ export default function FAQSection() {
 
   if (loading) {
     return (
-      <section className="relative overflow-hidden bg-[#0c0c0c] py-16 sm:py-20 lg:py-24">
+      <section className="relative overflow-hidden bg-white py-16 sm:py-20 lg:py-24">
         <div className="shell px-4 sm:px-6 text-center">
           <div className="mx-auto max-w-2xl animate-pulse">
-            <div className="mx-auto mb-4 h-3 w-24 rounded bg-white/10" />
-            <div className="mx-auto h-8 w-64 rounded bg-white/10" />
+            <div className="mx-auto mb-4 h-3 w-24 rounded bg-navy-200" />
+            <div className="mx-auto h-8 w-64 rounded bg-navy-200" />
           </div>
         </div>
       </section>
@@ -65,25 +65,25 @@ export default function FAQSection() {
   }
 
   return (
-    <section className="relative overflow-hidden bg-[#0c0c0c] py-16 sm:py-20 lg:py-24">
+    <section className="relative overflow-hidden bg-white py-16 sm:py-20 lg:py-24">
       <span
         aria-hidden="true"
-        className="absolute -top-32 left-1/2 -z-10 size-[40rem] -translate-x-1/2 rounded-full bg-crimson-600/[0.04] blur-[120px]"
+        className="absolute -top-32 left-1/2 -z-10 size-[40rem] -translate-x-1/2 rounded-full bg-crimson-600/[0.03] blur-[120px]"
       />
 
       <div className="shell relative z-10 px-4 sm:px-6">
         <div className="mx-auto max-w-2xl text-center">
-          <p className="mb-4 inline-flex items-center gap-2.5 text-[0.6875rem] font-bold tracking-[0.2em] uppercase text-crimson-500">
+          <p className="mb-4 inline-flex items-center gap-2.5 text-[0.6875rem] font-bold tracking-[0.2em] uppercase text-crimson-600">
             <span aria-hidden="true" className="h-px w-8 bg-crimson-500/50" />
             Need to know
             <span aria-hidden="true" className="h-px w-8 bg-crimson-500/50" />
           </p>
-          <h2 className="font-[family-name:var(--font-display)] text-3xl font-bold leading-[1.12] text-white sm:text-4xl lg:text-[2.75rem]">
+          <h2 className="font-[family-name:var(--font-display)] text-3xl font-bold leading-[1.12] text-navy-900 sm:text-4xl lg:text-[2.75rem]">
             Frequently Asked Questions
           </h2>
         </div>
 
-        <div className="mx-auto mt-12 max-w-3xl divide-y divide-white/[0.06]">
+        <div className="mx-auto mt-12 max-w-3xl divide-y divide-sand-200">
           {faqs.map((faq, index) => (
             <FAQItem
               key={faq.id}
@@ -125,18 +125,18 @@ function FAQItem({ faq, index, isOpen, onToggle }) {
         aria-expanded={isOpen}
         className="flex w-full items-center gap-4 py-5 text-left sm:gap-6 sm:py-6"
       >
-        <span className="shrink-0 font-[family-name:var(--font-display)] text-sm font-bold text-crimson-500/60 tabular-nums">
+        <span className="shrink-0 font-[family-name:var(--font-display)] text-sm font-bold text-crimson-600 tabular-nums">
           {num}
         </span>
 
-        <span className="flex-1 font-[family-name:var(--font-display)] text-[0.9375rem] font-semibold leading-snug text-bone-100 transition-colors group-hover:text-white sm:text-base">
+        <span className="flex-1 font-[family-name:var(--font-display)] text-[0.9375rem] font-semibold leading-snug text-navy-800 transition-colors group-hover:text-navy-950 sm:text-base">
           {faq.question}
         </span>
 
         <ChevronDown
           size={18}
           strokeWidth={2}
-          className="shrink-0 text-bone-300/50 transition-transform"
+          className="shrink-0 text-navy-400 transition-transform"
           style={{
             transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
             transition: reduced ? 'none' : 'transform 0.3s ease',
@@ -161,7 +161,7 @@ function FAQItem({ faq, index, isOpen, onToggle }) {
       >
         <div ref={contentRef} className="overflow-hidden">
           <div className="pb-5 pl-10 pr-4 sm:pb-6 sm:pl-12">
-            <p className="text-[0.9375rem] leading-relaxed text-bone-300/70 sm:text-base">
+            <p className="text-[0.9375rem] leading-relaxed text-navy-600 sm:text-base">
               {faq.answer}
             </p>
           </div>

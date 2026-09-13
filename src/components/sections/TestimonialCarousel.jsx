@@ -110,7 +110,7 @@ export default function TestimonialCarousel() {
                 const isLeft = offset < 0
                 const sign = isLeft ? 1 : (offset > 0 ? -1 : 0)
 
-                const photoSrc = `/logo${(i % 5) + 1}.jpg`
+                const photoSrc = client.logoUrl || `/logo${(i % 5) + 1}.jpg`
                 return (
                   <div
                     key={client.id}
@@ -135,7 +135,7 @@ export default function TestimonialCarousel() {
                     {photoSrc ? (
                       <SmartImage
                         src={photoSrc}
-                        alt={`${client.organizationName} photo`}
+                        alt={`${client.organizationName} logo`}
                         className="hc-photo-img"
                         loading={absOffset <= 2 ? 'eager' : 'lazy'}
                       />
@@ -156,31 +156,6 @@ export default function TestimonialCarousel() {
             {activeClient && (
               <div className="hc-info" key={activeClient.id}>
                 <p className="hc-info__name">{activeClient.organizationName}</p>
-                <p className="hc-info__type">
-                  {activeClient.organizationType}
-                  {activeClient.tripType && <> · {activeClient.tripType}</>}
-                </p>
-                {activeClient.review && (
-                  <p className="hc-info__review">&ldquo;{activeClient.review}&rdquo;</p>
-                )}
-                {activeClient.location && (
-                  <p className="hc-info__location">{activeClient.location}</p>
-                )}
-              </div>
-            )}
-
-            {/* Dots */}
-            {total > 1 && (
-              <div className="hc-dots">
-                {list.map((client, i) => (
-                  <button
-                    key={client.id}
-                    type="button"
-                    onClick={() => go(i)}
-                    className={`hc-dot ${i === active ? 'hc-dot--active' : ''}`}
-                    aria-label={`Go to ${client.organizationName}`}
-                  />
-                ))}
               </div>
             )}
           </>

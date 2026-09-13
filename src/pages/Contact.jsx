@@ -1,6 +1,4 @@
 import {
-  Clock,
-  Headset,
   Mail,
   MapPin,
   MessageCircle,
@@ -116,40 +114,6 @@ export default function Contact() {
               </div>
             </div>
 
-            {/* Business hours */}
-            <div className="rounded-3xl bg-white p-6 shadow-panel sm:p-7">
-              <h3 className="flex items-center gap-2.5 text-lg text-navy-900">
-                <Clock size={19} className="text-crimson-600" aria-hidden="true" />
-                Business hours
-              </h3>
-              <dl className="mt-5 divide-y divide-sand-200">
-                {company.hours.map((row, index) => (
-                  <div key={row.days} className="flex items-center justify-between gap-4 py-3.5">
-                    <dt
-                      className={`text-sm font-semibold ${
-                        index === company.hours.length - 1 ? 'flex items-center gap-2 text-emerald-700' : 'text-navy-600'
-                      }`}
-                    >
-                      {index === company.hours.length - 1 && (
-                        <Headset size={15} aria-hidden="true" />
-                      )}
-                      {row.days}
-                    </dt>
-                    <dd
-                      className={`text-sm font-bold tabular-nums ${
-                        index === company.hours.length - 1 ? 'text-emerald-700' : 'text-navy-900'
-                      }`}
-                    >
-                      {row.time}
-                    </dd>
-                  </div>
-                ))}
-              </dl>
-              <p className="mt-4 rounded-2xl bg-sand-50 px-4 py-3 text-xs leading-relaxed text-navy-500">
-                Walk-ins are welcome, but calling ahead means a coordinator with your destination
-                notes is free when you arrive.
-              </p>
-            </div>
           </div>
 
           {/* Enquiry form column */}

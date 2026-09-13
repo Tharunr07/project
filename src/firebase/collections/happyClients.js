@@ -55,12 +55,15 @@ export function subscribeHappyClients() {
     subscribeCollection(COLLECTION, { onData: (list) => onData(byOrder(list)), onError })
 }
 
+/** Clients excluded from the public display (retained in Firestore for admin). */
+const PUBLIC_EXCLUDED = new Set(['Happy Family Tours', 'Sunrise Technologies'])
+
 /** Active happy clients for the public Home Page marquee. */
 export function subscribeActiveHappyClients() {
   return (onData, onError) =>
     subscribeCollection(COLLECTION, {
       filters: [where('isActive', '==', true)],
-      onData: (list) => onData(byOrder(list)),
+      onData: (list) => onData(byOrder(list).filter((c) => !PUBLIC_EXCLUDED.has(c.organizationName))),
       onError,
     })
 }
@@ -118,15 +121,6 @@ export async function deleteHappyClient(id) {
  */
 const SEED_HAPPY_CLIENTS = [
   {
-    organizationName: 'ABC College of Engineering',
-    organizationType: 'College',
-    review: 'Avengers Holidays made our college trip smooth, comfortable and truly memorable.',
-    destination: 'Ooty',
-    tripType: 'College Tour',
-    location: 'Chennai, Tamil Nadu',
-    imageUrl: '/1.jpeg',
-  },
-  {
     organizationName: 'Green Valley Matriculation School',
     organizationType: 'School',
     review: 'Our students enjoyed a safe and well-organized trip with excellent travel support.',
@@ -152,15 +146,6 @@ const SEED_HAPPY_CLIENTS = [
     tripType: 'Educational Trip',
     location: 'Coimbatore, Tamil Nadu',
     imageUrl: '/4.jpeg',
-  },
-  {
-    organizationName: 'Happy Family Tours',
-    organizationType: 'Family',
-    review: 'Our family holiday was comfortable, enjoyable and beautifully organized from start to finish.',
-    destination: 'Wayanad',
-    tripType: 'Family Holiday',
-    location: 'Chennai, Tamil Nadu',
-    imageUrl: '/5.jpeg',
   },
   {
     organizationName: 'NextGen Solutions',
